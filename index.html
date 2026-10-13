@@ -12,7 +12,7 @@
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171c;--card:#1f232b;--tx:#e8eaee;--mu:#9aa1ad;--bd:#343a46;--ac:#6ea0ff}}
 :root[data-theme="dark"]{--bg:#15171c;--card:#1f232b;--tx:#e8eaee;--mu:#9aa1ad;--bd:#343a46;--ac:#6ea0ff}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{margin:0;background:var(--bg);color:var(--tx);font-family:Heebo,Arial,"Segoe UI",sans-serif;line-height:1.5}
 header{padding:14px 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--card);border-bottom:1px solid var(--bd)}
 h1{font-size:20px;margin:0}
@@ -27,9 +27,8 @@ textarea{min-height:70px;resize:vertical}
 .item{border:1px dashed var(--bd);border-radius:10px;padding:8px;margin-bottom:8px}
 button{font:inherit;font-size:14px;padding:8px 14px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer}
 button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
-button:disabled{opacity:.6;cursor:wait}
 .sm{font-size:12px;padding:4px 10px}
-.hint{font-size:12px;color:var(--mu)}
+.hint{font-size:12px;color:var(--mu);font-weight:400}
 #msg{font-size:13px;margin:6px 0;min-height:18px}
 .prev{position:sticky;top:8px;align-self:start;overflow-x:auto}
 #cv{background:#fff;color:#222;width:100%;max-width:794px;margin:auto;box-shadow:0 2px 14px #0002;min-height:600px}
@@ -41,30 +40,27 @@ button:disabled{opacity:.6;cursor:wait}
 #cv p{margin:3px 0;font-size:13.5px;white-space:pre-wrap}
 #cv .j{margin-bottom:9px}#cv .jt{font-weight:700;font-size:14px}#cv .jm{font-size:12.5px;color:#666}
 @page{size:A4;margin:0}
-*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 @media print{body{background:#fff}header,.form,.noprint{display:none!important}.wrap{display:block;padding:0}.prev{position:static}#cv{box-shadow:none;max-width:none}}
 </style>
 </head>
 <body>
 <header class="noprint">
   <h1>📄 בונה קורות חיים</h1>
-  <div class="row" style="flex:none">
-    <button id="dl">⬇ הורד</button>
-    <button id="pr">🖨 הדפס / PDF</button>
-  </div>
+  <div class="row" style="flex:none"><button id="dl">⬇ הורד</button><button id="pr">🖨 הדפס / PDF</button></div>
 </header>
 <div class="wrap">
 <div class="form">
   <div class="card">
     <h2>📎 כבר יש לך קורות חיים?</h2>
-    <p class="hint" style="margin:0 0 6px">העלה קובץ (PDF / Word / טקסט) והטקסט יוצג כאן, כדי שתוכל להעתיק ממנו לשדות המתאימים לפי המבנה.</p>
-    <input type="file" id="file" accept=".pdf,.docx,.txt"><textarea id="ref" readonly placeholder="הטקסט מהקובץ יופיע כאן להעתקה" style="margin-top:8px;min-height:110px;display:none"></textarea>
+    <p class="hint" style="margin:0 0 6px">העלי קובץ (PDF / Word / טקסט) והמערכת תנסה לסדר אותו לפי המבנה. אחר כך כדאי לבדוק ולתקן.</p>
+    <input type="file" id="file" accept=".pdf,.docx,.txt">
+    <textarea id="ref" readonly placeholder="הטקסט מהקובץ יופיע כאן להעתקה" style="margin-top:8px;min-height:110px;display:none"></textarea>
   </div>
   <div class="card">
     <h2>✨ ניסוח מקצועי בעזרת ChatGPT (חינם)</h2>
-    <p class="hint" style="margin:0 0 8px">1) מלאי את הטופס או העלי קובץ קיים. 2) לחצי "העתק פרומפט" והדביקי ב-ChatGPT (או Claude / Gemini). 3) העתיקי את התשובה שחזרה והדביקי כאן.</p>
+    <p class="hint" style="margin:0 0 8px">1) מלאי את הטופס או העלי קובץ קיים. 2) לחצי "העתק פרומפט" והדביקי ב-ChatGPT (או Claude / Gemini). 3) העתיקי את התשובה והדביקי כאן.</p>
     <button class="p" id="cp" type="button">1. העתק פרומפט</button>
-    <label>2. הדבק כאן את התשובה</label>
+    <label>2. הדביקי כאן את התשובה</label>
     <textarea id="ans" placeholder="הדביקי את התשובה שקיבלת (קוד JSON)" style="min-height:90px" dir="ltr"></textarea>
     <button class="p" id="ap" type="button" style="margin-top:6px">3. עדכן את קורות החיים</button>
   </div>
@@ -72,7 +68,7 @@ button:disabled{opacity:.6;cursor:wait}
   <div class="card">
     <h2>עיצוב</h2>
     <label>צבע רקע עליון</label>
-    <div class="row"><input type="color" id="color" value="#1e3a8a" style="height:40px;padding:2px"></div>
+    <input type="color" id="color" value="#1e3a8a" style="height:40px;padding:2px">
   </div>
   <div class="card">
     <h2>פרטים אישיים</h2>
@@ -84,54 +80,71 @@ button:disabled{opacity:.6;cursor:wait}
   </div>
   <div class="card">
     <h2>פרופיל מקצועי</h2>
-    <label>ספר בכמה שורות על הניסיון שלך ומה אתה מחפש כיום</label>
-    <textarea data-k="profile"></textarea><button class="sm" id="tpl" type="button" style="margin-top:6px">הוסף נוסח לדוגמה</button>
+    <label>ספרי בכמה שורות על הניסיון שלך ומה את מחפשת כיום</label>
+    <textarea data-k="profile"></textarea>
+    <button class="sm" id="tpl" type="button" style="margin-top:6px">הוסף נוסח לדוגמה</button>
   </div>
   <div class="card"><h2>ניסיון תעסוקתי <span class="hint">(מהחדש לישן)</span></h2><div id="jobs"></div><button class="sm" data-add="jobs">+ הוסף תפקיד</button></div>
-  <div class="card"><h2>השכלה והכשרות <span class="hint">(מהחדש לישן)</span></h2><div id="edu"></div><button class="sm" data-add="edu">+ הוסף</button></div>
+  <div class="card"><h2>השכלה ולימודים <span class="hint">(מהחדש לישן)</span></h2><div id="edu"></div><button class="sm" data-add="edu">+ הוסף לימודים</button></div>
+  <div class="card"><h2>קורסים, הכשרות והסמכות <span class="hint">(אם יש)</span></h2><p class="hint" style="margin:0 0 6px">קורסים מקצועיים קצרים, תעודות הסמכה, סדנאות רלוונטיות לתחום.</p><div id="courses"></div><button class="sm" data-add="courses">+ הוסף קורס / הסמכה</button></div>
   <div class="card">
     <h2>כישורים ומיומנויות</h2>
-    <label>שליטה במערכות ותוכנות (מופרד בפסיקים)</label><textarea data-k="tech" style="min-height:50px"></textarea>
-    <label>כישורים רכים (מופרד בפסיקים)</label><textarea data-k="soft" style="min-height:50px"></textarea>
+    <label>כלים, תוכנות וטכנולוגיות (מופרד בפסיקים, למשל: Canva, Figma, Office, Python, Jira)</label>
+    <textarea data-k="tech" style="min-height:50px"></textarea>
+    <label>כישורים מקצועיים ורכים (מופרד בפסיקים, למשל: ניהול זמן, עבודת צוות, שירות לקוחות)</label>
+    <textarea data-k="soft" style="min-height:50px"></textarea>
   </div>
+  <div class="card"><h2>שירות צבאי / לאומי <span class="hint">(אם רלוונטי)</span></h2><div id="military"></div><button class="sm" data-add="military">+ הוסף שירות</button></div>
   <div class="card"><h2>שפות</h2><div id="langs"></div><button class="sm" data-add="langs">+ הוסף שפה</button></div>
 </div>
 <div class="prev"><div id="cv"></div></div>
 </div>
 <script>
-const VERBS=["ניהלתי","פיתחתי","הובלתי","הקמתי","שיפרתי","ייעלתי","הטמעתי","אחראי על","בניתי","ליוויתי","הגדלתי","תכננתי"];
-const LV=["שפת אם","טובה מאוד","טובה","בינונית"],ET=["תואר אקדמי","קורס / הכשרה","שירות צבאי / לאומי"];
-const blank={jobs:()=>({role:"",company:"",years:"",desc:""}),edu:()=>({type:ET[0],text:"",years:""}),langs:()=>({name:"",level:LV[0]})};
-let S={color:"#1e3a8a",name:"",phone:"",city:"",email:"",dob:"",profile:"",tech:"",soft:"",jobs:[blank.jobs()],edu:[blank.edu()],langs:[{name:"עברית",level:LV[0]},{name:"אנגלית",level:LV[1]}]};
+const LV=["שפת אם","רמה גבוהה / שוטפת","רמה בינונית","רמה בסיסית"];
+const VERBS=["ניהלתי","פיתחתי","הובלתי","הקמתי","שיפרתי","ייעלתי","הטמעתי","אחראית על","בניתי","ליוויתי","הגדלתי","תכננתי"];
+const LISTS={
+ jobs:[["שם התפקיד","role"],["חברה / ארגון","company"],["שנים (לדוגמה: 2021–2024)","years"],["תיאור תפקיד – פעלים כמו ניהלתי, פיתחתי, הובלתי","desc","t"]],
+ edu:[["תואר אקדמי / תעודה (תחום הלימודים)","degree"],["מוסד הלימודים","inst"],["שנת סיום","year"],["הצטיינויות או ממוצע גבוה (אם רלוונטי)","honors"]],
+ courses:[["שם הקורס / ההסמכה / הסדנה","name"],["גוף מארגן","org"],["שנה","year"]],
+ military:[["שנות שירות (לדוגמה: 2015–2018)","years"],["תפקיד","role"],["חיל / יחידה","unit"],["עיקרי העשייה (פיקוד, ניהול, הדרכה, טכנולוגיה)","desc","t"]],
+ langs:[["שפה","name"],["רמת שליטה","level","s"]]
+};
+const blank=k=>Object.fromEntries(LISTS[k].map(x=>[x[1],x[2]==="s"?LV[0]:""]));
+let S={color:"#1e3a8a",name:"",phone:"",city:"",email:"",dob:"",profile:"",tech:"",soft:"",jobs:[blank("jobs")],edu:[blank("edu")],courses:[blank("courses")],military:[],langs:[{name:"עברית",level:LV[0]},{name:"אנגלית",level:LV[1]}]};
 const $=s=>document.querySelector(s),esc=t=>String(t??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const say=(t,err)=>{$("#msg").textContent=t;$("#msg").style.color=err?"#dc2626":"var(--mu)"};
-try{const s=localStorage.getItem("cv");if(s)S=Object.assign(S,JSON.parse(s))}catch(e){}
+try{const s=localStorage.getItem("cv2");if(s)S=Object.assign(S,JSON.parse(s))}catch(e){}
 
-function fld(l,t,k,i,f,v,type){return `<label>${l}</label><${t} data-l="${k}" data-i="${i}" data-f="${f}">${t=="textarea"?esc(v):""}</${t}>`.replace(`<${t} `,`<${t} value="${esc(v)}" `)}
-function sel(k,i,f,opts,v){return `<select data-l="${k}" data-i="${i}" data-f="${f}">${opts.map(o=>`<option${o==v?" selected":""}>${o}</option>`).join("")}</select>`}
 function lists(){
-  $("#jobs").innerHTML=S.jobs.map((j,i)=>`<div class="item">${fld("שם התפקיד","input","jobs",i,"role",j.role)}${fld("חברה / ארגון","input","jobs",i,"company",j.company)}${fld("שנים (לדוגמה: 2021–2024)","input","jobs",i,"years",j.years)}${fld("תיאור תפקיד – פעלים כמו ניהלתי, פיתחתי, הובלתי","textarea","jobs",i,"desc",j.desc)}<div class="hint">פעלים להוספה:</div><div>${VERBS.map(v=>`<button class="sm" type="button" data-verb="${v}" data-i="${i}">${v}</button>`).join(" ")}</div><br><button class="sm" data-del="jobs" data-i="${i}">מחק</button></div>`).join("");
-  $("#edu").innerHTML=S.edu.map((e,i)=>`<div class="item"><label>סוג</label>${sel("edu",i,"type",ET,e.type)}${fld("פרטים (תואר, מוסד / קורס / יחידה)","input","edu",i,"text",e.text)}${fld("שנים","input","edu",i,"years",e.years)}<br><button class="sm" data-del="edu" data-i="${i}">מחק</button></div>`).join("");
-  $("#langs").innerHTML=S.langs.map((e,i)=>`<div class="item row">${fld("שפה","input","langs",i,"name",e.name)}<div><label>רמה</label>${sel("langs",i,"level",LV,e.level)}</div><div style="flex:none;align-self:end"><button class="sm" data-del="langs" data-i="${i}">✕</button></div></div>`).join("");
+  for(const k in LISTS){
+    $("#"+k).innerHTML=S[k].map((it,i)=>`<div class="item">${LISTS[k].map(([l,f,t])=>{
+      const a=`data-l="${k}" data-i="${i}" data-f="${f}"`,v=it[f]||"";
+      return `<label>${l}</label>`+(t==="t"?`<textarea ${a}>${esc(v)}</textarea>`:t==="s"?`<select ${a}>${LV.map(o=>`<option${o==v?" selected":""}>${o}</option>`).join("")}</select>`:`<input ${a} value="${esc(v)}">`)}).join("")}${k==="jobs"?`<div class="hint">פעלים להוספה:</div><div>${VERBS.map(v=>`<button class="sm" type="button" data-verb="${v}" data-i="${i}">${v}</button>`).join(" ")}</div>`:""}<br><button class="sm" data-del="${k}" data-i="${i}">מחק</button></div>`).join("");
+  }
 }
-function fmtDob(d){if(!d)return"";const[a,b,c]=d.split("-");return `${c}/${b}/${a}`}
+const fmtDob=d=>{if(!d)return"";const[a,b,c]=d.split("-");return `${c}/${b}/${a}`};
 const list=t=>(t||"").split(/[,،\n]/).map(x=>x.trim()).filter(Boolean);
+const meta=a=>a.filter(Boolean).map(esc).join(" • ");
 function render(){
-  const c=S.color,h=(t)=>`<h4 style="color:${c};border-color:${c}">${t}</h4>`;
+  const c=S.color,h=t=>`<h4 style="color:${c};border-color:${c}">${t}</h4>`;
   const ct=[S.phone&&"📞 "+esc(S.phone),S.email&&"✉ "+esc(S.email),S.city&&"📍 "+esc(S.city),S.dob&&"🎂 "+fmtDob(S.dob)].filter(Boolean).map(x=>`<span>${x}</span>`).join("");
   let o=`<div class="top" style="background:${c}"><h3>${esc(S.name)||"שם מלא"}</h3><div class="ct">${ct}</div></div><div class="bd">`;
   if(S.profile)o+=h("פרופיל מקצועי")+`<p>${esc(S.profile)}</p>`;
   const jobs=S.jobs.filter(j=>j.role||j.company);
   if(jobs.length)o+=h("ניסיון תעסוקתי")+jobs.map(j=>`<div class="j"><div class="jt">${esc(j.role)}${j.company?" | "+esc(j.company):""}</div><div class="jm">${esc(j.years)}</div><p>${esc(j.desc)}</p></div>`).join("");
-  const ed=S.edu.filter(e=>e.text);
-  if(ed.length)o+=h("השכלה והכשרות מקצועיות")+ed.map(e=>`<div class="j"><div class="jt">${esc(e.text)}</div><div class="jm">${esc(e.type)}${e.years?" • "+esc(e.years):""}</div></div>`).join("");
+  const ed=S.edu.filter(e=>e.degree||e.inst);
+  if(ed.length)o+=h("השכלה ולימודים")+ed.map(e=>`<div class="j"><div class="jt">${esc(e.degree)}</div><div class="jm">${meta([e.inst,e.year])}</div>${e.honors?`<p>${esc(e.honors)}</p>`:""}</div>`).join("");
+  const cr=S.courses.filter(e=>e.name);
+  if(cr.length)o+=h("קורסים, הכשרות והסמכות")+cr.map(e=>`<div class="j"><span class="jt">${esc(e.name)}</span> <span class="jm">${meta([e.org,e.year])}</span></div>`).join("");
   if(S.tech||S.soft){o+=h("כישורים ומיומנויות");
-    if(S.tech)o+=`<p><b>מערכות ותוכנות:</b> ${list(S.tech).map(esc).join(" • ")}</p>`;
-    if(S.soft)o+=`<p><b>כישורים רכים:</b> ${list(S.soft).map(esc).join(" • ")}</p>`}
+    if(S.tech)o+=`<p><b>כלים ותוכנות:</b> ${list(S.tech).map(esc).join(" • ")}</p>`;
+    if(S.soft)o+=`<p><b>כישורים מקצועיים ורכים:</b> ${list(S.soft).map(esc).join(" • ")}</p>`}
+  const ml=S.military.filter(e=>e.role||e.unit||e.years);
+  if(ml.length)o+=h("שירות צבאי / לאומי")+ml.map(e=>`<div class="j"><div class="jt">${esc(e.role)}${e.unit?" | "+esc(e.unit):""}</div><div class="jm">${esc(e.years)}</div>${e.desc?`<p>${esc(e.desc)}</p>`:""}</div>`).join("");
   const lg=S.langs.filter(l=>l.name);
   if(lg.length)o+=h("שפות")+`<p>${lg.map(l=>`${esc(l.name)} – ${esc(l.level)}`).join(" | ")}</p>`;
   $("#cv").innerHTML=o+"</div>";
-  try{localStorage.setItem("cv",JSON.stringify(S))}catch(e){}
+  try{localStorage.setItem("cv2",JSON.stringify(S))}catch(e){}
 }
 function fill(){document.querySelectorAll("[data-k]").forEach(e=>e.value=S[e.dataset.k]||"");$("#color").value=S.color;lists();render()}
 document.addEventListener("input",e=>{const t=e.target;
@@ -141,15 +154,21 @@ document.addEventListener("input",e=>{const t=e.target;
   render()});
 document.addEventListener("click",e=>{const t=e.target;
   if(t.dataset.verb){const j=S.jobs[+t.dataset.i];j.desc+=(j.desc&&!j.desc.endsWith("\n")?"\n":"")+"• "+t.dataset.verb+" ";lists();render()}
-  if(t.id==="tpl"){S.profile="בעל/ת ניסיון של [X] שנים ב[תחום], עם התמחות ב[התמחות]. הובלתי/פיתחתי [הישג עיקרי]. מחפש/ת כיום תפקיד [סוג תפקיד] ב[סוג ארגון] שבו אוכל לתרום [ערך מרכזי].";fill()}
-  if(t.dataset.add){S[t.dataset.add].push(blank[t.dataset.add]());lists();render()}
+  if(t.id==="tpl"){S.profile="בעלת ניסיון של [X] שנים ב[תחום], עם התמחות ב[התמחות]. הובלתי/פיתחתי [הישג עיקרי]. מחפשת כיום תפקיד [סוג תפקיד] ב[סוג ארגון] שבו אוכל לתרום [ערך מרכזי].";fill()}
+  if(t.dataset.add){S[t.dataset.add].push(blank(t.dataset.add));lists();render()}
   if(t.dataset.del){S[t.dataset.del].splice(+t.dataset.i,1);lists();render()}});
 
 /* Parser */
 const YR=/((?:19|20)\d\d)\s*[-–—עד]+\s*((?:19|20)\d\d|היום|כיום|הווה|present|now)|(?:19|20)\d\d/i;
-const HD={profile:/^(פרופיל|תקציר|אודות|סיכום|summary|profile|about)/i,jobs:/^(ניסיון|תעסוקת|experience|employment)/i,edu:/^(השכלה|הכשרות|לימודים|education)/i,skills:/^(כישורים|מיומנויות|skills|שליטה)/i,langs:/^(שפות|languages)/i};
-function blocks(lines){const out=[];let cur=null;
-  for(const l of lines){if(YR.test(l)&&l.length<90||!cur){cur={lines:[]};out.push(cur)}cur.lines.push(l)}return out}
+const HD={profile:/^(פרופיל|תקציר|אודות|סיכום|summary|profile|about)/i,jobs:/^(ניסיון|תעסוקת|experience|employment)/i,edu:/^(השכלה|לימודים|education)/i,courses:/^(קורסים|הכשרות|הסמכות|תעודות|courses|certifications)/i,skills:/^(כישורים|מיומנויות|skills|שליטה)/i,military:/^(שירות צבאי|שירות לאומי|שירות סדיר|צבא|military)/i,langs:/^(שפות|languages)/i};
+function blocks(lines){
+  const yi=lines.map((l,i)=>YR.test(l)&&l.length<90?i:-1).filter(i=>i>=0);
+  const p=yi.length&&yi[0]<=2?yi[0]:0;
+  let st=[...new Set(yi.map(i=>Math.max(i-p,0)))];if(!st.length)st=[0];st[0]=0;
+  return st.map((s,j)=>{const ln=lines.slice(s,st[j+1]??lines.length);let years="";
+    const k=ln.findIndex(l=>YR.test(l)&&l.length<90);
+    if(k>=0){const m=ln[k].match(YR);years=m[0];ln[k]=ln[k].replace(m[0],"").replace(/[|•,\-–()]+/g," ").trim();if(!ln[k])ln.splice(k,1)}
+    return{years,ln}})}
 function parseCV(txt){
   const L=txt.split(/\r?\n/).map(l=>l.replace(/\s+/g," ").trim()).filter(Boolean);let found=0;
   const em=txt.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);if(em){S.email=em[0];found++}
@@ -159,22 +178,23 @@ function parseCV(txt){
   for(const l of L){const h=Object.keys(HD).find(x=>l.length<32&&HD[x].test(l.replace(/[:\-–•\s]+$/,"")));
     if(h){k=h;sec[k]=sec[k]||[];continue}if(k)sec[k].push(l.replace(/^[•·▪\-–*]\s*/,""))}
   if(sec.profile?.length){S.profile=sec.profile.join(" ");found++}
-  if(sec.jobs?.length){S.jobs=blocks(sec.jobs).map(b=>{const ln=[...b.lines];let years="";
-      const yi=ln.findIndex(l=>YR.test(l));if(yi>=0){const m=ln[yi].match(YR);years=m[0];ln[yi]=ln[yi].replace(m[0],"").replace(/[|•,\-–()]+/g," ").trim();if(!ln[yi])ln.splice(yi,1)}
-      const role=ln.shift()||"";let company="";if(ln.length&&ln[0].length<40&&ln.length>1)company=ln.shift();
-      return{role,company,years,desc:ln.map(x=>"• "+x).join("\n")}});found++}
-  if(sec.edu?.length){S.edu=blocks(sec.edu).map(b=>{const ln=[...b.lines];let years="";const yi=ln.findIndex(l=>YR.test(l));
-      if(yi>=0){const m=ln[yi].match(YR);years=m[0];ln[yi]=ln[yi].replace(m[0],"").replace(/[|•,\-–()]+/g," ").trim();if(!ln[yi])ln.splice(yi,1)}
-      const t=ln.join(" – ");const type=/צבא|צה"ל|שירות|לאומי/.test(t)?ET[2]:/תואר|אוניברסיט|מכללה|B\.?A|M\.?A|B\.?Sc|הנדסאי/i.test(t)?ET[0]:ET[1];
-      return{type,text:t,years}});found++}
-  if(sec.skills?.length){const soft=/תקשורת|עבודת צוות|ניהול זמן|יצירתיות|פתרון בעיות|סבלנות|אחריות|למידה|שירות/;const T=[],O=[];
+  if(sec.jobs?.length){S.jobs=blocks(sec.jobs).map(b=>{const ln=b.ln,role=ln.shift()||"";let company="";if(ln.length>1&&ln[0].length<40)company=ln.shift();
+      return{role,company,years:b.years,desc:ln.map(x=>"• "+x).join("\n")}});found++}
+  if(sec.edu?.length){const hon=/ממוצע|הצטיינ|דיקן|ציון|cum laude/i;
+    S.edu=blocks(sec.edu).map(b=>{const ln=b.ln,honors=ln.filter(x=>hon.test(x)).join(", "),r=ln.filter(x=>!hon.test(x));
+      return{degree:r.shift()||"",inst:r.join(" – "),year:b.years,honors}});found++}
+  if(sec.courses?.length){S.courses=sec.courses.map(l=>{const y=(l.match(/(?:19|20)\d\d/)||[""])[0],p=l.replace(y,"").replace(/[()]/g," ").split(/\s[-–|]\s/).map(x=>x.trim()).filter(Boolean);
+      return{name:p[0]||"",org:p.slice(1).join(", "),year:y}});found++}
+  if(sec.military?.length){S.military=blocks(sec.military).map(b=>{const ln=b.ln,role=ln.shift()||"";let unit="";if(ln.length>1&&ln[0].length<40)unit=ln.shift();
+      return{years:b.years,role,unit,desc:ln.map(x=>"• "+x).join("\n")}});found++}
+  if(sec.skills?.length){const soft=/תקשורת|עבודת צוות|ניהול זמן|יצירתיות|פתרון בעיות|סבלנות|אחריות|למידה|שירות|ניהול תקציב|הנחיה|הדרכה/;const T=[],O=[];
     sec.skills.join(",").split(/[,،;|]/).map(x=>x.replace(/^[^:]{0,30}:/,"").trim()).filter(Boolean).forEach(x=>(soft.test(x)?O:T).push(x));
     S.tech=T.join(", ");S.soft=O.join(", ");found++}
-  const lt=(sec.langs||[]).join(" ")||"";const names=["עברית","אנגלית","ערבית","רוסית","צרפתית","ספרדית","גרמנית"],lg=[];
-  names.forEach(n=>{const i=lt.indexOf(n);if(i<0)return;const seg=lt.slice(i,i+30);
-    lg.push({name:n,level:/שפת אם|שפת-אם/.test(seg)?LV[0]:/טובה מאוד|מצוינת|גבוהה/.test(seg)?LV[1]:/טובה/.test(seg)?LV[2]:LV[3]})});
+  const lt=(sec.langs||[]).join(" ")||"",lg=[];
+  ["עברית","אנגלית","ערבית","רוסית","צרפתית","ספרדית","גרמנית"].forEach(n=>{const i=lt.indexOf(n);if(i<0)return;const seg=lt.slice(i,i+30);
+    lg.push({name:n,level:/שפת אם|שפת-אם/.test(seg)?LV[0]:/גבוהה|שוטפת|טובה מאוד|מצוינת/.test(seg)?LV[1]:/בינונית|טובה/.test(seg)?LV[2]:LV[3]})});
   if(lg.length){S.langs=lg;found++}
-  ["jobs","edu","langs"].forEach(x=>{if(!S[x].length)S[x]=[blank[x]()]});fill();return found}
+  ["jobs","edu","courses","langs"].forEach(x=>{if(!S[x].length)S[x]=[blank(x)]});fill();return found}
 
 /* Upload */
 $("#file").onchange=async function(){
@@ -194,11 +214,11 @@ $("#file").onchange=async function(){
 };
 
 /* ChatGPT bridge */
-const SCHEMA=`{"name":"","phone":"","city":"","email":"","dob":"YYYY-MM-DD או ריק","profile":"","jobs":[{"role":"","company":"","years":"","desc":""}],"edu":[{"type":"תואר אקדמי|קורס / הכשרה|שירות צבאי / לאומי","text":"","years":""}],"tech":"פסיקים","soft":"פסיקים","langs":[{"name":"","level":"שפת אם|טובה מאוד|טובה|בינונית"}]}`;
+const SCHEMA=`{"name":"","phone":"","city":"","email":"","dob":"YYYY-MM-DD או ריק","profile":"","jobs":[{"role":"","company":"","years":"","desc":""}],"edu":[{"degree":"תואר / תעודה (תחום הלימודים)","inst":"מוסד הלימודים","year":"שנת סיום","honors":"הצטיינות או ממוצע, אם יש"}],"courses":[{"name":"","org":"","year":""}],"tech":"כלים ותוכנות, מופרד בפסיקים","soft":"כישורים מקצועיים ורכים, מופרד בפסיקים","military":[{"years":"","role":"","unit":"חיל / יחידה","desc":""}],"langs":[{"name":"","level":"${LV.join("|")}"}]}`;
 $("#cp").onclick=async()=>{
   const d={...S};delete d.color;const ref=$("#ref").value.trim();
   const prompt=`אתה עורך מקצועי של קורות חיים בעברית. נסח את קורות החיים הבאים בצורה מקצועית וקצרה.
-כללים: ניסיון והשכלה מהחדש לישן. תיאורי תפקיד בפעלים בלשון עבר (ניהלתי, פיתחתי, הובלתי), שורה לכל נקודה ובתחילתה "• ". פרופיל מקצועי של 2-4 שורות: ניסיון ומה מחפש כיום. אל תמציא עובדות, חברות או נתונים שלא נמסרו.
+כללים: ניסיון והשכלה מהחדש לישן. תיאורי תפקיד בפעלים בלשון עבר (ניהלתי, פיתחתי, הובלתי), שורה לכל נקודה ובתחילתה "• ". פרופיל מקצועי של 2-4 שורות: ניסיון ומה מחפש כיום. הפרד בין לימודים אקדמיים, קורסים והסמכות, ושירות צבאי. אל תמציא עובדות, חברות או נתונים שלא נמסרו.
 החזר JSON בלבד, בלי הסברים, בתוך בלוק קוד, במבנה הזה:
 ${SCHEMA}
 
@@ -211,9 +231,9 @@ $("#ap").onclick=()=>{
     const t=$("#ans").value,a=t.indexOf("{"),b=t.lastIndexOf("}");
     if(a<0||b<a)throw 0;
     const r=JSON.parse(t.slice(a,b+1));const keep=S.color;S=Object.assign(S,r,{color:keep});
-    ["jobs","edu","langs"].forEach(k=>{if(!Array.isArray(S[k])||!S[k].length)S[k]=[blank[k]()]});
+    for(const k in LISTS){S[k]=(Array.isArray(S[k])?S[k]:[]).map(x=>({...blank(k),...x}));if(!S[k].length&&k!=="military")S[k]=[blank(k)]}
+    S.jobs.forEach(j=>{if(Array.isArray(j.desc))j.desc=j.desc.join("\n")});S.military.forEach(j=>{if(Array.isArray(j.desc))j.desc=j.desc.join("\n")});
     if(Array.isArray(S.tech))S.tech=S.tech.join(", ");if(Array.isArray(S.soft))S.soft=S.soft.join(", ");
-    S.jobs=S.jobs.map(j=>({...blank.jobs(),...j,desc:Array.isArray(j.desc)?j.desc.join("\n"):j.desc}));
     fill();$("#ans").value="";say("✓ קורות החיים עודכנו. אפשר לערוך ידנית.");
   }catch(e){say("לא הצלחתי לקרוא את התשובה. ודאי שהעתקת את כל ה-JSON (מ-{ עד }).",1)}
 };
@@ -221,7 +241,7 @@ $("#ap").onclick=()=>{
 /* Export */
 $("#pr").onclick=()=>window.print();
 $("#dl").onclick=()=>{
-  const html=`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>${esc(S.name)} - קורות חיים</title><style>body{margin:0;font-family:Arial,sans-serif}.top{padding:28px 32px;color:#fff}.top h3{margin:0 0 6px;font-size:28px}.ct{font-size:13px;display:flex;flex-wrap:wrap;gap:4px 16px}.bd{padding:20px 32px}h4{margin:16px 0 6px;font-size:15px;border-bottom:2px solid;padding-bottom:3px}p{margin:3px 0;font-size:13.5px;white-space:pre-wrap}.jt{font-weight:700}.jm{font-size:12.5px;color:#666}.j{margin-bottom:9px}</style></head><body>${$("#cv").innerHTML}</body></html>`;
+  const html=`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>${esc(S.name)} - קורות חיים</title><style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;font-family:Arial,sans-serif}.top{padding:28px 32px;color:#fff}.top h3{margin:0 0 6px;font-size:28px}.ct{font-size:13px;display:flex;flex-wrap:wrap;gap:4px 16px}.bd{padding:20px 32px}h4{margin:16px 0 6px;font-size:15px;border-bottom:2px solid;padding-bottom:3px}p{margin:3px 0;font-size:13.5px;white-space:pre-wrap}.jt{font-weight:700}.jm{font-size:12.5px;color:#666}.j{margin-bottom:9px}@page{size:A4;margin:0}</style></head><body>${$("#cv").innerHTML}</body></html>`;
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download=(S.name||"cv")+".html";a.click();
 };
 fill();
