@@ -116,7 +116,7 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
 <div class="prev"><div id="cv"></div></div>
 </div>
 <script>
-const LV=["שפת אם","רמה גבוהה / שוטפת","רמה בינונית","רמה בסיסית"];
+const LV=["שפת אם","רמה גבוהה / שוטפת","רמה טובה","רמה בינונית","רמה בסיסית"];
 const DG=["","תעודת בגרות","תעודה מקצועית","תעודת טכנאי","תעודת הנדסאי","תעודת הוראה","לימודי תעודה אקדמיים","תואר ראשון (B.A.)","תואר ראשון (B.Sc.)","תואר ראשון (B.Ed.)","תואר ראשון (LL.B.)","תואר ראשון (B.Eng. / B.Tech.)","תואר ראשון (B.F.A.)","תואר שני (M.A.)","תואר שני (M.Sc.)","תואר שני (MBA)","תואר שני (M.Ed.)","תואר שני (LL.M.)","תואר שני (M.Eng.)","דוקטורט (Ph.D.)","פוסט-דוקטורט","רישיון / התמחות מקצועית","אחר"];
 const OPTS={LV:null,DG};
 const LANGS="עברית|אנגלית|ערבית|רוסית|צרפתית|ספרדית|גרמנית|איטלקית|פורטוגזית|אמהרית|תיגרינית|יידיש|לדינו|הולנדית|שוודית|נורווגית|דנית|פינית|איסלנדית|פולנית|צ'כית|סלובקית|הונגרית|רומנית|מולדובנית|בולגרית|סרבית|קרואטית|בוסנית|סלובנית|מקדונית|אלבנית|יוונית|טורקית|פרסית|כורדית|ארמנית|גאורגית|אוקראינית|בלארוסית|ליטאית|לטבית|אסטונית|אזרית|קזחית|אוזבקית|טורקמנית|קירגיזית|טג'יקית|מונגולית|סינית (מנדרינית)|קנטונזית|יפנית|קוריאנית|וייטנאמית|תאית|לאו|חמרית|בורמזית|אינדונזית|מלאית|פיליפינית (טגלוג)|הינדי|אורדו|בנגלית|פנג'אבית|גוג'ראטית|מראטהי|טמילית|טלוגו|קנאדה|מלאיאלאם|סינהלית|נפאלית|פשטו|דארי|סוואהילית|זולו|קסוסה|אפריקאנס|יורובה|איגבו|האוסה|סומלית|אורומו|שונה|מלגשית|אירית|וולשית|גאלית סקוטית|באסקית|קטלאנית|גליציאנית|פריזית|מלטזית|לוקסמבורגית|קצ'ואה|גוארני|קריאולית האיטית|מאורית|סמואנית|טונגאית|לטינית|יוונית עתיקה|ארמית|סנסקריט|אספרנטו|שפת סימנים ישראלית|שפת סימנים אמריקאית".split("|");
@@ -191,7 +191,7 @@ document.addEventListener("click",e=>{const t=e.target;
 
 /* Parser */
 const YR=/((?:19|20)\d\d)\s*[-–—עד]+\s*((?:19|20)\d\d|היום|כיום|הווה|present|now)|(?:19|20)\d\d/i;
-const HD={profile:/^(פרופיל|תקציר|אודות|סיכום|summary|profile|about)/i,jobs:/^(ניסיון|תעסוקת|experience|employment|work)/i,edu:/^(השכלה|לימודים|education)/i,courses:/^(קורסים|הכשרות|הסמכות|תעודות|השתלמויות|courses|certifications)/i,tech:/^(תוכנות|שליטה במערכות|שליטה בתוכנות|טכנולוגיות|כלים|software|tools)/i,skills:/^(כישורים|מיומנויות|skills)/i,military:/^(שירות צבאי|שירות לאומי|שירות סדיר|צבא|military)/i,langs:/^(שפות|languages)/i};
+const HD={profile:/^(פרופיל|תקציר|אודות|סיכום|summary|profile|about)/i,jobs:/^(ניסיון|תעסוקת|experience|employment|work)/i,edu:/^(השכלה|לימודים|education)/i,courses:/^(קורסים|הכשרות|הסמכות|תעודות|השתלמויות|courses|certifications)/i,tech:/^(תוכנות|ידע במחשבים|ידע בתוכנות|שליטה במחשב|שליטה במערכות|שליטה בתוכנות|טכנולוגיות|כלים|software|tools)/i,skills:/^(כישורים|מיומנויות|skills)/i,military:/^(שירות צבאי|שירות לאומי|שירות סדיר|צבא|military)/i,langs:/^(שפות|שליטה בשפות|languages)/i};
 function blocks(lines){
   const yi=lines.map((l,i)=>YR.test(l)&&l.length<90?i:-1).filter(i=>i>=0);
   const p=yi.length&&yi[0]<=2?yi[0]:0;
@@ -208,7 +208,15 @@ function detDeg(t){
   if(b)return DG.find(x=>x.startsWith("תואר ראשון")&&x.includes(b))||"";
   if(/הנדסאי/.test(t))return "תעודת הנדסאי";if(/טכנאי/.test(t))return "תעודת טכנאי";if(/תעודת הוראה/.test(t))return "תעודת הוראה";if(/בגרות/.test(t))return "תעודת בגרות";if(/תעודה|הסמכה/.test(t))return "תעודה מקצועית";
   return ""}
+function splitBy(lines,re){const out=[];let cur=null;
+  for(const l of lines){if(!cur||(re.test(l)&&cur.length)){cur=[];out.push(cur)}cur.push(l)}
+  return out.map(ln=>{ln=[...ln];let years="";const k=ln.findIndex(l=>YR.test(l)&&l.length<90);
+    if(k>=0){const m=ln[k].match(YR);years=m[0];ln[k]=ln[k].replace(m[0],"").replace(/[|•,\-–()]+/g," ").trim();if(!ln[k])ln.splice(k,1)}
+    return{years,ln}})}
+const EDU_START=/^(תעודת|תעודה|תואר|הנדסאי|טכנאי|לימודי|דוקטורט|B\.?A|M\.?A|B\.?Sc|M\.?Sc|MBA)/i;
+const EDU_TYPE_ONLY=/^(תעודת \S+|תעודה מקצועית|תואר (ראשון|שני|שלישי)[^]{0,12}|דוקטורט[^]{0,10}|B\.?A\.?|M\.?A\.?|B\.?Sc\.?|M\.?Sc\.?|MBA|הנדסאי|טכנאי)$/i;
 function parseCV(txt){
+  txt=txt.replace(/(שירות צבאי|שירות לאומי|שירות סדיר|השכלה ולימודים|השכלה|לימודים|ניסיון תעסוקתי|ניסיון מקצועי|ניסיון|כישורים ומיומנויות|כישורים|מיומנויות|שליטה בשפות|שפות|קורסים והכשרות|קורסים|הכשרות והסמכות|הכשרות|הסמכות|ידע במחשבים|תוכנות מחשב|תוכנות|פרופיל מקצועי|תקציר מקצועי|תקציר)\s*:\s*/g,"\n$1\n").replace(/[ \t]*[–—][ \t]*(?=\n|$)/g,"").replace(/(\S)\s[–—]\s(\S)/g,(m,a,b)=>/\d/.test(a)&&/\d/.test(b)?m:a+"\n"+b);
   const L=txt.split(/\r?\n/).map(l=>l.replace(/\s+/g," ").trim()).filter(Boolean);let found=0;
   const em=txt.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);if(em){S.email=em[0];found++}
   const ph=txt.match(/(?:\+972[-\s]?|0)(?:5\d|[2-9])[-\s]?\d{3}[-\s]?\d{4}/);if(ph){S.phone=ph[0].replace(/\s/g,"");found++}
@@ -220,7 +228,7 @@ function parseCV(txt){
   if(sec.jobs?.length){S.jobs=blocks(sec.jobs).map(b=>{const ln=b.ln,role=ln.shift()||"";let company="";if(ln.length>1&&ln[0].length<40)company=ln.shift();
       return{role,company,years:b.years,desc:ln.map(x=>"• "+x).join("\n")}});found++}
   if(sec.edu?.length){const hon=/ממוצע|הצטיינ|דיקן|ציון|cum laude/i;
-    S.edu=blocks(sec.edu).map(b=>{const ln=b.ln,honors=ln.filter(x=>hon.test(x)).join(", "),r=ln.filter(x=>!hon.test(x));
+    S.edu=splitBy(sec.edu,EDU_START).map(b=>{const ln=b.ln,honors=ln.filter(x=>hon.test(x)).join(", "),r=ln.filter(x=>!hon.test(x));if(r.length>1&&r[0].length<=25&&EDU_TYPE_ONLY.test(r[0]))r.shift();
       const all=ln.join(" "),dt=detDeg(all);return{type:dt,degree:r.shift()||"",inst:r.join(" – "),year:b.years,honors}});found++}
   if(sec.courses?.length){S.courses=sec.courses.map(l=>{const y=(l.match(/(?:19|20)\d\d/)||[""])[0],p=l.replace(y,"").replace(/[()]/g," ").split(/\s[-–|]\s/).map(x=>x.trim()).filter(Boolean);
       return{name:p[0]||"",org:p.slice(1).join(", "),year:y}});found++}
@@ -237,8 +245,9 @@ function parseCV(txt){
   items(sec.skills).forEach(x=>{if(soft.test(x))O.push(x);else if(/[A-Za-z]/.test(x)){if(!have.has(x.toLowerCase())){have.add(x.toLowerCase());T.push(x)}}else if(!swFound.some(n=>x.includes(n)))O.push(x)});
   if(T.length){S.tech=T.join(", ");found++}if(O.length){S.soft=O.join(", ");found++}
   const lt=(sec.langs||[]).join(" ")||"",lg=[];
-  LANGS.forEach(n=>{const nm=n.split(" (")[0],i=lt.indexOf(nm);if(i<0)return;const seg=lt.slice(i,i+30);
-    lg.push({name:n,level:/שפת אם|שפת-אם/.test(seg)?LV[0]:/גבוהה|שוטפת|טובה מאוד|מצוינת/.test(seg)?LV[1]:/בינונית|טובה/.test(seg)?LV[2]:LV[3]})});
+  const pos=LANGS.map(n=>({n,i:lt.indexOf(n.split(" (")[0])})).filter(x=>x.i>=0).sort((a,b)=>a.i-b.i);
+  pos.forEach((x,j)=>{const seg=lt.slice(x.i,pos[j+1]?pos[j+1].i:lt.length);
+    lg.push({name:x.n,level:/שפת אם|שפת-אם|native/i.test(seg)?LV[0]:/גבוהה|שוטפת|טובה מאוד|טובה מאד|מצוינת|fluent/i.test(seg)?LV[1]:/טובה|good/i.test(seg)?LV[2]:/בינונית/.test(seg)?LV[3]:LV[4]})});
   if(lg.length){S.langs=lg;found++}
   ["jobs","edu","courses","langs"].forEach(x=>{if(!S[x].length)S[x]=[blank(x)]});fill();return found}
 
@@ -251,7 +260,13 @@ $("#file").onchange=async function(){
     else if(n.endsWith(".docx"))txt=(await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()})).value;
     else if(n.endsWith(".pdf")){
       const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
-      for(let p=1;p<=pdf.numPages;p++){const c=await(await pdf.getPage(p)).getTextContent();let y=null;for(const it of c.items){const yy=it.transform[5];if(y!==null&&Math.abs(yy-y)>2)txt+="\n";txt+=it.str+" ";y=yy}txt+="\n"}
+      const he=/[\u0590-\u05FF]/;
+      for(let p=1;p<=pdf.numPages;p++){const c=await(await pdf.getPage(p)).getTextContent();const rows=[];
+        for(const it of c.items){if(!it.str.trim())continue;const y=it.transform[5];let r=rows.find(r=>Math.abs(r.y-y)<=3);if(!r){r={y,items:[]};rows.push(r)}r.items.push({x:it.transform[4],s:it.str.trim()})}
+        rows.sort((a,b)=>b.y-a.y);
+        for(const r of rows){const all=r.items.map(i=>i.s).join("");const rtl=(all.match(/[\u0590-\u05FF]/g)||[]).length>all.replace(/\s/g,"").length/2;
+          r.items.sort((a,b)=>rtl?b.x-a.x:a.x-b.x);txt+=r.items.map(i=>i.s).join(" ")+"\n"}
+        txt+="\n"}
     }else if(n.endsWith(".doc"))throw {message:"קובץ Word ישן (.doc). שמרי אותו כ-.docx או כ-PDF ונסי שוב"};else throw {message:"סוג קובץ לא נתמך. אפשר PDF, Word (.docx) או טקסט"};
     if(txt.trim().length<30)throw {message:"לא נמצא טקסט בקובץ (אולי סרוק כתמונה)"};
     const r=$("#ref");r.style.display="block";r.value=txt;const n2=parseCV(txt);say(`✓ זוהו ${n2} חלקים והוכנסו לטופס. בדקי ותקני – הטקסט המקורי נשאר בתיבה. להשלמה ולניסוח מקצועי אפשר להשתמש בכרטיס ChatGPT.`);
