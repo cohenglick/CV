@@ -98,7 +98,7 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
   <div class="card"><h2>השכלה ולימודים <span class="hint">(מהחדש לישן)</span></h2><div id="edu"></div><button class="sm" data-add="edu">+ הוסף לימודים</button></div>
   <div class="card"><h2>קורסים, הכשרות והסמכות <span class="hint">(אם יש)</span></h2><p class="hint" style="margin:0 0 6px">קורסים מקצועיים קצרים, תעודות הסמכה, סדנאות רלוונטיות לתחום.</p><div id="courses"></div><button class="sm" data-add="courses">+ הוסף קורס / הסמכה</button></div>
   <div class="card">
-    <h2>כישורים ומיומנויות <span class="hint">(כישורים רכים בלבד)</span></h2>
+    <h2>כישורים ומיומנויות <span class="hint">(כישורים רכים בלבד – ללא תוכנות ושפות)</span></h2>
     <label>מופרד בפסיקים, למשל: ניהול זמן, עבודת צוות, תקשורת בין-אישית, פתרון בעיות, שירות לקוחות</label>
     <textarea data-k="soft" style="min-height:60px"></textarea>
   </div>
@@ -145,7 +145,7 @@ function lists(){
   }
 }
 const fmtDob=d=>{if(!d)return"";const[a,b,c]=d.split("-");return `${c}/${b}/${a}`};
-const list=t=>(t||"").split(/[,،\n]/).map(x=>x.trim()).filter(Boolean);
+const list=t=>(t||"").split(/[,،\n•]/).map(x=>x.trim()).filter(Boolean);
 const meta=a=>a.filter(Boolean).map(esc).join(" • ");
 function render(){
   const c=S.color,h=t=>`<h4 style="color:${c};border-color:${c}">${t}</h4>`;
@@ -208,6 +208,14 @@ function detDeg(t){
   if(b)return DG.find(x=>x.startsWith("תואר ראשון")&&x.includes(b))||"";
   if(/הנדסאי/.test(t))return "תעודת הנדסאי";if(/טכנאי/.test(t))return "תעודת טכנאי";if(/תעודת הוראה/.test(t))return "תעודת הוראה";if(/בגרות/.test(t))return "תעודת בגרות";if(/תעודה|הסמכה/.test(t))return "תעודה מקצועית";
   return ""}
+function swNames(x){const tk=x.split(/[\s,()\/]+/).map(t=>t.toLowerCase()),xl=x.trim().toLowerCase();return SWALL.filter(n=>{const l=n.toLowerCase();return xl===l||tk.includes(l)})}
+function splitSkills(){
+  const comp=/מחשב|תוכנ|מערכות מידע|אופיס|אקסל|וורד|פאוורפוינט|office|excel|outlook/i,lr=new RegExp(LANGS.map(n=>n.split(" (")[0].replace(/[()]/g,"")).join("|")),keep=[];let T=list(S.tech);
+  list(S.soft).forEach(x=>{
+    if(lr.test(x)&&/שפת אם|רמה|שוטפ|בסיסית|טובה/.test(x))return;
+    const sw=swNames(x);if(comp.test(x)||sw.length){const add=sw.length?sw.map(n=>n.replace(/^Microsoft Office$/,"Office")):/office|אופיס/i.test(x)?["Office"]:[];add.forEach(n=>{if(!T.some(t=>t.toLowerCase()===n.toLowerCase()))T.push(n)});return}
+    keep.push(x)});
+  S.soft=keep.join(", ");S.tech=T.join(", ")}
 function splitBy(lines,re){const out=[];let cur=null;
   for(const l of lines){if(!cur||(re.test(l)&&cur.length)){cur=[];out.push(cur)}cur.push(l)}
   return out.map(ln=>{ln=[...ln];let years="";const k=ln.findIndex(l=>YR.test(l)&&l.length<90);
@@ -238,7 +246,7 @@ function parseCV(txt){
   const have=new Set(),swFound=[];
   SW.forEach(n=>{const e=n.replace(/[.+#]/g,"\\$&"),re=/[A-Za-z]/.test(n)?new RegExp("(?<![A-Za-z])"+e+"(?![A-Za-z])","i"):new RegExp(e);
     if(re.test(txt)&&!(n==="Office"&&/Microsoft Office/i.test(txt))&&!have.has(n.toLowerCase())){have.add(n.toLowerCase());swFound.push(n)}});
-  const items=a=>(a||[]).join(",").split(/[,،;|]/).map(x=>x.replace(/^[^:]{0,30}:/,"").trim()).filter(Boolean);
+  const items=a=>(a||[]).join(",").split(/[,،;|•]/).map(x=>x.replace(/^[^:]{0,30}:/,"").trim()).filter(Boolean);
   const soft=/תקשורת|עבודת צוות|ניהול זמן|יצירתיות|פתרון בעיות|סבלנות|אחריות|למידה|שירות|ניהול תקציב|הנחיה|הדרכה|מוטיבציה|גמישות|יוזמה|עמידה בלחץ|הקשבה|משא ומתן|ארגון|מנהיגות/;
   const T=[...swFound],O=[];
   items(sec.tech).forEach(x=>{if(!have.has(x.toLowerCase())){have.add(x.toLowerCase());T.push(x)}});
@@ -249,7 +257,7 @@ function parseCV(txt){
   pos.forEach((x,j)=>{const seg=lt.slice(x.i,pos[j+1]?pos[j+1].i:lt.length);
     lg.push({name:x.n,level:/שפת אם|שפת-אם|native/i.test(seg)?LV[0]:/גבוהה|שוטפת|טובה מאוד|טובה מאד|מצוינת|fluent/i.test(seg)?LV[1]:/טובה|good/i.test(seg)?LV[2]:/בינונית/.test(seg)?LV[3]:LV[4]})});
   if(lg.length){S.langs=lg;found++}
-  ["jobs","edu","courses","langs"].forEach(x=>{if(!S[x].length)S[x]=[blank(x)]});fill();return found}
+  ["jobs","edu","courses","langs"].forEach(x=>{if(!S[x].length)S[x]=[blank(x)]});splitSkills();fill();return found}
 
 /* Upload */
 $("#file").onchange=async function(){
@@ -295,7 +303,7 @@ $("#ap").onclick=()=>{
     for(const k in LISTS){S[k]=(Array.isArray(S[k])?S[k]:[]).map(x=>({...blank(k),...x}));if(!S[k].length&&k!=="military")S[k]=[blank(k)]}
     S.jobs.forEach(j=>{if(Array.isArray(j.desc))j.desc=j.desc.join("\n")});S.military.forEach(j=>{if(Array.isArray(j.desc))j.desc=j.desc.join("\n")});
     if(Array.isArray(S.tech))S.tech=S.tech.join(", ");if(Array.isArray(S.soft))S.soft=S.soft.join(", ");
-    fill();$("#ans").value="";say("✓ קורות החיים עודכנו. אפשר לערוך ידנית.");
+    splitSkills();fill();$("#ans").value="";say("✓ קורות החיים עודכנו. אפשר לערוך ידנית.");
   }catch(e){say("לא הצלחתי לקרוא את התשובה. ודאי שהעתקת את כל ה-JSON (מ-{ עד }).",1)}
 };
 
@@ -305,7 +313,7 @@ $("#dl").onclick=()=>{
   const html=`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>${esc(S.name)} - קורות חיים</title><style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;font-family:Arial,sans-serif}.top{padding:28px 32px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px}.top img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #fff}.top h3{margin:0 0 6px;font-size:28px}.ct{font-size:13px;display:flex;flex-wrap:wrap;gap:4px 16px}.bd{padding:20px 32px}h4{margin:16px 0 6px;font-size:15px;border-bottom:2px solid;padding-bottom:3px}p{margin:3px 0;font-size:13.5px;white-space:pre-wrap}.jt{font-weight:700}.jm{font-size:12.5px;color:#666}.j{margin-bottom:9px}@page{size:A4;margin:0}</style></head><body>${$("#cv").innerHTML}</body></html>`;
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download=(S.name||"cv")+".html";a.click();
 };
-fill();
+splitSkills();fill();
 </script>
 </body>
 </html>
