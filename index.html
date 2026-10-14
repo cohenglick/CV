@@ -208,10 +208,13 @@ function detDeg(t){
   if(b)return DG.find(x=>x.startsWith("תואר ראשון")&&x.includes(b))||"";
   if(/הנדסאי/.test(t))return "תעודת הנדסאי";if(/טכנאי/.test(t))return "תעודת טכנאי";if(/תעודת הוראה/.test(t))return "תעודת הוראה";if(/בגרות/.test(t))return "תעודת בגרות";if(/תעודה|הסמכה/.test(t))return "תעודה מקצועית";
   return ""}
+const SOFT_WL=new RegExp(["תקשורת","עבודת צוות","עבודה בצוות","ניהול זמן","יצירתיות","פתרון בעיות","סבלנות","אחריות אישית","למידה מהירה","יכולת למידה","שירותיות","יחסי אנוש","עמידה בלחץ","עבודה תחת לחץ","גמישות","יוזמה","הקשבה","משא ומתן","סדר וארגון","כושר ארגון","יכולת ארגון","מנהיגות","אסרטיביות","אמפתיה","חשיבה אנליטית","חשיבה יצירתית","חשיבה חיובית","מוטיבציה","דייקנות","דיוק","אמינות","יושרה","נאמנות","התמדה","עצמאות","הסתגלות","ראש גדול","חוסן","אכפתיות","אדיבות","יחס אישי","ריבוי משימות","עמידה ביעדים","עמידה בלוחות זמנים","בין-אישי","בין אישי","הדרכה","שכנוע","מכירתיות","חדשנות","סקרנות","קבלת החלטות","ניהול קונפליקטים","עבודה עצמאית","שיתוף פעולה","ניהול סטרס","רצינות","אנרגטי","חיוביות","מסירות","סודיות","שקדנות","ראייה מערכתית","חשיבה מחוץ לקופסה"].join("|")+"|^(אחריות|אחראיות)$");
+const isSentence=x=>/\d/.test(x)||x.trim().split(/\s+/).length>7;
 function swNames(x){const tk=x.split(/[\s,()\/]+/).map(t=>t.toLowerCase()),xl=x.trim().toLowerCase();return SWALL.filter(n=>{const l=n.toLowerCase();return xl===l||tk.includes(l)})}
 function splitSkills(){
   const comp=/מחשב|תוכנ|מערכות מידע|אופיס|אקסל|וורד|פאוורפוינט|office|excel|outlook/i,lr=new RegExp(LANGS.map(n=>n.split(" (")[0].replace(/[()]/g,"")).join("|")),keep=[];let T=list(S.tech);
   list(S.soft).forEach(x=>{
+    if(isSentence(x))return;
     if(lr.test(x)&&/שפת אם|רמה|שוטפ|בסיסית|טובה/.test(x))return;
     const sw=swNames(x);if(comp.test(x)||sw.length){const add=sw.length?sw.map(n=>n.replace(/^Microsoft Office$/,"Office")):/office|אופיס/i.test(x)?["Office"]:[];add.forEach(n=>{if(!T.some(t=>t.toLowerCase()===n.toLowerCase()))T.push(n)});return}
     keep.push(x)});
@@ -223,6 +226,8 @@ function splitBy(lines,re){const out=[];let cur=null;
     return{years,ln}})}
 const EDU_START=/^(תעודת|תעודה|תואר|הנדסאי|טכנאי|לימודי|דוקטורט|B\.?A|M\.?A|B\.?Sc|M\.?Sc|MBA)/i;
 const EDU_TYPE_ONLY=/^(תעודת \S+|תעודה מקצועית|תואר (ראשון|שני|שלישי)[^]{0,12}|דוקטורט[^]{0,10}|B\.?A\.?|M\.?A\.?|B\.?Sc\.?|M\.?Sc\.?|MBA|הנדסאי|טכנאי)$/i;
+const EDU_KW=/תעודת|בגרות|תואר|אוניברסיט|מכללה|תיכון|בית ספר|בי"ס|ישיבה|אולפנה|סמינר|לימוד|הנדסאי|טכנאי|קורס|הכשרה|הסמכה|B\.?A|M\.?A|B\.?Sc|M\.?Sc|MBA|דוקטור|מוסמך|בוגר|ממוצע|פסיכומטרי|טכניון|מגמ|הצטיינ|דיקן/i;
+const WORK_KW=/חופשת לידה|טיפול בילד|תחת לחץ|הפגנת|מתן מענה|מתן שירות|שירות לקוחות|ניהול|ניהלתי|אחראי|אחריות|תפקיד|תיאום|עבודה|עובד|מנהל|מזכיר|פקיד|מוקד|לקוחות|שוטף|ביצוע|טיפול|משרד|חברת|בחברה|ארגון/;
 function parseCV(txt){
   txt=txt.replace(/(שירות צבאי|שירות לאומי|שירות סדיר|השכלה ולימודים|השכלה|לימודים|ניסיון תעסוקתי|ניסיון מקצועי|ניסיון|כישורים ומיומנויות|כישורים|מיומנויות|שליטה בשפות|שפות|קורסים והכשרות|קורסים|הכשרות והסמכות|הכשרות|הסמכות|ידע במחשבים|תוכנות מחשב|תוכנות|פרופיל מקצועי|תקציר מקצועי|תקציר)\s*:\s*/g,"\n$1\n").replace(/[ \t]*[–—][ \t]*(?=\n|$)/g,"").replace(/(\S)\s[–—]\s(\S)/g,(m,a,b)=>/\d/.test(a)&&/\d/.test(b)?m:a+"\n"+b);
   const L=txt.split(/\r?\n/).map(l=>l.replace(/\s+/g," ").trim()).filter(Boolean);let found=0;
@@ -233,8 +238,17 @@ function parseCV(txt){
   for(const l of L){const h=Object.keys(HD).find(x=>l.length<32&&HD[x].test(l.replace(/[:\-–•\s]+$/,"")));
     if(h){k=h;sec[k]=sec[k]||[];continue}if(k)sec[k].push(l.replace(/^[•·▪\-–*]\s*/,""))}
   if(sec.profile?.length){S.profile=sec.profile.join(" ");found++}
-  if(sec.jobs?.length){S.jobs=blocks(sec.jobs).map(b=>{const ln=b.ln,role=ln.shift()||"";let company="";if(ln.length>1&&ln[0].length<40)company=ln.shift();
+  if(sec.jobs?.length){S.jobs=blocks(sec.jobs).map(b=>{const ln=b.ln,role=ln.shift()||"";let company="";if(ln.length&&ln[0].length<40)company=ln.shift();
       return{role,company,years:b.years,desc:ln.map(x=>"• "+x).join("\n")}});found++}
+  if(sec.edu?.length){const wk=[],ed=[];
+    sec.edu.forEach(l=>{if(/^[\d\s\-–—./]+$/.test(l)){ed.push(l);return}
+      if(/הפסקה תעסוקתית/.test(l)){wk.push("הפסקה תעסוקתית");l=l.replace(/הפסקה תעסוקתית/g,"").trim();if(!l)return}
+      if(WORK_KW.test(l)&&!EDU_KW.test(l))wk.push(l);else ed.push(l)});
+    if(wk.length){let years="",k=wk.findIndex(l=>YR.test(l)),role=wk[0],rest=wk.slice(1);
+      if(k>=0){const m=wk[k].match(YR);years=m[0];role=wk[k].replace(m[0],"").replace(/[|•,\-–()]+/g," ").trim()||"";rest=wk.filter((_,i)=>i!==k)}
+      const job={role,company:"",years,desc:rest.map(x=>"• "+x).join("\n")};
+      if(S.jobs.length===1&&!S.jobs[0].role&&!S.jobs[0].company)S.jobs=[job];else S.jobs.push(job);found++}
+    sec.edu=ed}
   if(sec.edu?.length){const hon=/ממוצע|הצטיינ|דיקן|ציון|cum laude/i;
     S.edu=splitBy(sec.edu,EDU_START).map(b=>{const ln=b.ln,honors=ln.filter(x=>hon.test(x)).join(", "),r=ln.filter(x=>!hon.test(x));if(r.length>1&&r[0].length<=25&&EDU_TYPE_ONLY.test(r[0]))r.shift();
       const all=ln.join(" "),dt=detDeg(all);return{type:dt,degree:r.shift()||"",inst:r.join(" – "),year:b.years,honors}});found++}
@@ -247,10 +261,10 @@ function parseCV(txt){
   SW.forEach(n=>{const e=n.replace(/[.+#]/g,"\\$&"),re=/[A-Za-z]/.test(n)?new RegExp("(?<![A-Za-z])"+e+"(?![A-Za-z])","i"):new RegExp(e);
     if(re.test(txt)&&!(n==="Office"&&/Microsoft Office/i.test(txt))&&!have.has(n.toLowerCase())){have.add(n.toLowerCase());swFound.push(n)}});
   const items=a=>(a||[]).join(",").split(/[,،;|•]/).map(x=>x.replace(/^[^:]{0,30}:/,"").trim()).filter(Boolean);
-  const soft=/תקשורת|עבודת צוות|ניהול זמן|יצירתיות|פתרון בעיות|סבלנות|אחריות|למידה|שירות|ניהול תקציב|הנחיה|הדרכה|מוטיבציה|גמישות|יוזמה|עמידה בלחץ|הקשבה|משא ומתן|ארגון|מנהיגות/;
+  const soft=SOFT_WL;
   const T=[...swFound],O=[];
   items(sec.tech).forEach(x=>{if(!have.has(x.toLowerCase())){have.add(x.toLowerCase());T.push(x)}});
-  items(sec.skills).forEach(x=>{if(soft.test(x))O.push(x);else if(/[A-Za-z]/.test(x)){if(!have.has(x.toLowerCase())){have.add(x.toLowerCase());T.push(x)}}else if(!swFound.some(n=>x.includes(n)))O.push(x)});
+  items(sec.skills).forEach(x=>{if(isSentence(x))return;if(soft.test(x)){if(!O.includes(x))O.push(x)}else if(/[A-Za-z]/.test(x)){if(!have.has(x.toLowerCase())){have.add(x.toLowerCase());T.push(x)}}});
   if(T.length){S.tech=T.join(", ");found++}if(O.length){S.soft=O.join(", ");found++}
   const lt=(sec.langs||[]).join(" ")||"",lg=[];
   const pos=LANGS.map(n=>({n,i:lt.indexOf(n.split(" (")[0])})).filter(x=>x.i>=0).sort((a,b)=>a.i-b.i);
