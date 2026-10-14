@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>בונה קורות חיים</title>
+<script src="access.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
@@ -44,11 +45,24 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
 .chip b{cursor:pointer;margin-inline-start:6px;color:var(--mu)}
 #cv .top{display:flex;justify-content:space-between;align-items:center;gap:16px}
 #cv .top img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #fff;flex:none}
+#lock{position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+#lock .box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:24px;max-width:400px;width:100%;text-align:center}
+#lock h2{margin:0 0 8px}#lock input{text-align:center;letter-spacing:2px;margin:10px 0;direction:ltr}
+#lock a.btn{display:block;text-decoration:none;margin-top:8px;padding:8px;border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-size:14px}
 @page{size:A4;margin:0}
 @media print{body{background:#fff}header,.form,.noprint{display:none!important}.wrap{display:block;padding:0}.prev{position:static}#cv{box-shadow:none;max-width:none}}
 </style>
 </head>
 <body>
+<div id="lock"><div class="box">
+  <h2>🔒 בונה קורות חיים</h2>
+  <p class="hint" id="lockTxt">הגישה לאפליקציה למשלמים בלבד. יש לך קוד גישה? הזיני אותו כאן.</p>
+  <input id="code" placeholder="XXXX-XXXX" autocomplete="off">
+  <button class="p" id="unlock" type="button" style="width:100%">כניסה</button>
+  <div id="lockErr" style="color:#dc2626;font-size:13px;min-height:18px;margin-top:6px"></div>
+  <a class="btn" id="payBtn" target="_blank" rel="noopener" style="display:none">לרכישת קוד גישה</a>
+  <a class="btn" id="waBtn" target="_blank" rel="noopener" style="display:none">שליחת אישור תשלום בוואטסאפ</a>
+</div></div>
 <header class="noprint">
   <h1>📄 בונה קורות חיים</h1>
   <div class="row" style="flex:none"><button id="dl">⬇ הורד</button><button id="pr">🖨 הדפס / PDF</button></div>
@@ -327,6 +341,23 @@ $("#dl").onclick=()=>{
   const html=`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>${esc(S.name)} - קורות חיים</title><style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;font-family:Arial,sans-serif}.top{padding:28px 32px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px}.top img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #fff}.top h3{margin:0 0 6px;font-size:28px}.ct{font-size:13px;display:flex;flex-wrap:wrap;gap:4px 16px}.bd{padding:20px 32px}h4{margin:16px 0 6px;font-size:15px;border-bottom:2px solid;padding-bottom:3px}p{margin:3px 0;font-size:13.5px;white-space:pre-wrap}.jt{font-weight:700}.jm{font-size:12.5px;color:#666}.j{margin-bottom:9px}@page{size:A4;margin:0}</style></head><body>${$("#cv").innerHTML}</body></html>`;
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download=(S.name||"cv")+".html";a.click();
 };
+/* Access gate */
+const AC=window.ACCESS||{};
+const normCode=c=>c.toUpperCase().replace(/[^A-Z0-9]/g,"");
+async function sha(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+(function initLock(){
+  const L=$("#lock");
+  if(!AC.hashes||!AC.hashes.length){L.style.display="none";return}
+  let ok=false;try{const h=localStorage.getItem("cv_access");ok=!!h&&AC.hashes.includes(h)}catch(e){}
+  if(ok){L.style.display="none";return}
+  if(AC.price)$("#lockTxt").textContent=`הגישה לאפליקציה למשלמים בלבד (${AC.price}). יש לך קוד גישה? הזיני אותו כאן.`;
+  if(AC.payUrl){const b=$("#payBtn");b.href=AC.payUrl;b.style.display="block"}
+  if(AC.wa){const b=$("#waBtn");b.href="https://wa.me/"+AC.wa+"?text="+encodeURIComponent("היי, שילמתי עבור הגישה לבונה קורות החיים. מצורף אישור תשלום.");b.style.display="block"}
+  const go=async()=>{const h=await sha(normCode($("#code").value));
+    if(AC.hashes.includes(h)){try{localStorage.setItem("cv_access",h)}catch(e){}L.style.display="none"}
+    else $("#lockErr").textContent="הקוד לא תקין. בדקי שהוזן במדויק."};
+  $("#unlock").onclick=go;$("#code").addEventListener("keydown",e=>{if(e.key==="Enter")go()});
+})();
 splitSkills();fill();
 </script>
 </body>
