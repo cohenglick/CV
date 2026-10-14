@@ -39,6 +39,11 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
 #cv h4{margin:16px 0 6px;font-size:15px;border-bottom:2px solid;padding-bottom:3px}
 #cv p{margin:3px 0;font-size:13.5px;white-space:pre-wrap}
 #cv .j{margin-bottom:9px}#cv .jt{font-weight:700;font-size:14px}#cv .jm{font-size:12.5px;color:#666}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{background:var(--bg);border:1px solid var(--bd);border-radius:99px;padding:2px 10px;font-size:13px}
+.chip b{cursor:pointer;margin-inline-start:6px;color:var(--mu)}
+#cv .top{display:flex;justify-content:space-between;align-items:center;gap:16px}
+#cv .top img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #fff;flex:none}
 @page{size:A4;margin:0}
 @media print{body{background:#fff}header,.form,.noprint{display:none!important}.wrap{display:block;padding:0}.prev{position:static}#cv{box-shadow:none;max-width:none}}
 </style>
@@ -71,6 +76,11 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
     <input type="color" id="color" value="#1e3a8a" style="height:40px;padding:2px">
   </div>
   <div class="card">
+    <h2>תמונת פרופיל <span class="hint">(לא חובה)</span></h2>
+    <input type="file" id="photo" accept="image/*">
+    <button class="sm" id="phdel" type="button" style="margin-top:6px">הסר תמונה</button>
+  </div>
+  <div class="card">
     <h2>פרטים אישיים</h2>
     <label>שם מלא</label><input data-k="name">
     <div class="row"><div><label>טלפון</label><input data-k="phone" type="tel" dir="ltr"></div>
@@ -88,29 +98,41 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
   <div class="card"><h2>השכלה ולימודים <span class="hint">(מהחדש לישן)</span></h2><div id="edu"></div><button class="sm" data-add="edu">+ הוסף לימודים</button></div>
   <div class="card"><h2>קורסים, הכשרות והסמכות <span class="hint">(אם יש)</span></h2><p class="hint" style="margin:0 0 6px">קורסים מקצועיים קצרים, תעודות הסמכה, סדנאות רלוונטיות לתחום.</p><div id="courses"></div><button class="sm" data-add="courses">+ הוסף קורס / הסמכה</button></div>
   <div class="card">
-    <h2>כישורים ומיומנויות</h2>
-    <label>כלים, תוכנות וטכנולוגיות (מופרד בפסיקים, למשל: Canva, Figma, Office, Python, Jira)</label>
-    <textarea data-k="tech" style="min-height:50px"></textarea>
-    <label>כישורים מקצועיים ורכים (מופרד בפסיקים, למשל: ניהול זמן, עבודת צוות, שירות לקוחות)</label>
-    <textarea data-k="soft" style="min-height:50px"></textarea>
+    <h2>כישורים ומיומנויות <span class="hint">(כישורים רכים בלבד)</span></h2>
+    <label>מופרד בפסיקים, למשל: ניהול זמן, עבודת צוות, תקשורת בין-אישית, פתרון בעיות, שירות לקוחות</label>
+    <textarea data-k="soft" style="min-height:60px"></textarea>
+  </div>
+  <div class="card">
+    <h2>תוכנות מחשב</h2>
+    <p class="hint" style="margin:0 0 6px">הקלידי לחיפוש ובחרי מהרשימה, או כתבי שם של תוכנה אחרת ולחצי "הוסף".</p>
+    <div class="chips" id="swchips"></div>
+    <div class="row"><input id="swin" list="swlist" placeholder="לדוגמה: Excel, Figma, SAP…"><button class="sm" id="swadd" type="button" style="flex:none">הוסף</button></div>
+    <datalist id="swlist"></datalist>
   </div>
   <div class="card"><h2>שירות צבאי / לאומי <span class="hint">(אם רלוונטי)</span></h2><div id="military"></div><button class="sm" data-add="military">+ הוסף שירות</button></div>
+  <datalist id="langlist"></datalist>
   <div class="card"><h2>שפות</h2><div id="langs"></div><button class="sm" data-add="langs">+ הוסף שפה</button></div>
 </div>
 <div class="prev"><div id="cv"></div></div>
 </div>
 <script>
 const LV=["שפת אם","רמה גבוהה / שוטפת","רמה בינונית","רמה בסיסית"];
+const DG=["","תעודת בגרות","תעודה מקצועית","תעודת טכנאי","תעודת הנדסאי","תעודת הוראה","לימודי תעודה אקדמיים","תואר ראשון (B.A.)","תואר ראשון (B.Sc.)","תואר ראשון (B.Ed.)","תואר ראשון (LL.B.)","תואר ראשון (B.Eng. / B.Tech.)","תואר ראשון (B.F.A.)","תואר שני (M.A.)","תואר שני (M.Sc.)","תואר שני (MBA)","תואר שני (M.Ed.)","תואר שני (LL.M.)","תואר שני (M.Eng.)","דוקטורט (Ph.D.)","פוסט-דוקטורט","רישיון / התמחות מקצועית","אחר"];
+const OPTS={LV:null,DG};
+const LANGS="עברית|אנגלית|ערבית|רוסית|צרפתית|ספרדית|גרמנית|איטלקית|פורטוגזית|אמהרית|תיגרינית|יידיש|לדינו|הולנדית|שוודית|נורווגית|דנית|פינית|איסלנדית|פולנית|צ'כית|סלובקית|הונגרית|רומנית|מולדובנית|בולגרית|סרבית|קרואטית|בוסנית|סלובנית|מקדונית|אלבנית|יוונית|טורקית|פרסית|כורדית|ארמנית|גאורגית|אוקראינית|בלארוסית|ליטאית|לטבית|אסטונית|אזרית|קזחית|אוזבקית|טורקמנית|קירגיזית|טג'יקית|מונגולית|סינית (מנדרינית)|קנטונזית|יפנית|קוריאנית|וייטנאמית|תאית|לאו|חמרית|בורמזית|אינדונזית|מלאית|פיליפינית (טגלוג)|הינדי|אורדו|בנגלית|פנג'אבית|גוג'ראטית|מראטהי|טמילית|טלוגו|קנאדה|מלאיאלאם|סינהלית|נפאלית|פשטו|דארי|סוואהילית|זולו|קסוסה|אפריקאנס|יורובה|איגבו|האוסה|סומלית|אורומו|שונה|מלגשית|אירית|וולשית|גאלית סקוטית|באסקית|קטלאנית|גליציאנית|פריזית|מלטזית|לוקסמבורגית|קצ'ואה|גוארני|קריאולית האיטית|מאורית|סמואנית|טונגאית|לטינית|יוונית עתיקה|ארמית|סנסקריט|אספרנטו|שפת סימנים ישראלית|שפת סימנים אמריקאית".split("|");
+const SWALL=("Microsoft Office|Word|Excel|PowerPoint|Outlook|OneNote|Access|Publisher|Project|Visio|Teams|SharePoint|OneDrive|Power BI|Power Automate|Power Apps|Google Workspace|Google Docs|Google Sheets|Google Slides|Google Drive|Gmail|Google Calendar|Google Meet|Google Forms|Apple Pages|Apple Numbers|Keynote|LibreOffice|Notion|Evernote|Obsidian|Airtable|Coda|Zoom|Slack|Discord|Skype|WhatsApp Business|Telegram|Webex|Canva|Figma|Adobe Photoshop|Adobe Illustrator|Adobe InDesign|Adobe XD|Adobe Lightroom|Adobe Acrobat|Adobe Premiere Pro|Adobe After Effects|Adobe Audition|Adobe Animate|Adobe Express|Sketch|Affinity Designer|Affinity Photo|CorelDRAW|GIMP|Inkscape|Blender|Maya|3ds Max|Cinema 4D|ZBrush|Unity|Unreal Engine|Final Cut Pro|DaVinci Resolve|CapCut|Camtasia|OBS Studio|Audacity|Logic Pro|Ableton Live|FL Studio|Pro Tools|AutoCAD|Revit|SketchUp|SolidWorks|Fusion 360|Inventor|CATIA|ArchiCAD|Rhino|Lumion|Civil 3D|Tekla|ANSYS|MATLAB|LabVIEW|Altium Designer|Python|Java|JavaScript|TypeScript|C|C++|C#|Go|Rust|Kotlin|Swift|PHP|Ruby|Scala|R|Dart|Perl|Bash|PowerShell|SQL|MySQL|PostgreSQL|SQL Server|Oracle DB|MongoDB|Redis|SQLite|Elasticsearch|Firebase|Supabase|React|Angular|Vue.js|Next.js|Node.js|Express|Django|Flask|FastAPI|Spring Boot|.NET|ASP.NET|Laravel|Flutter|React Native|HTML|CSS|Sass|Tailwind CSS|Bootstrap|jQuery|WordPress|Wix|Webflow|Elementor|Shopify|WooCommerce|Magento|Squarespace|Git|GitHub|GitLab|Bitbucket|Jira|Confluence|Trello|Asana|Monday.com|ClickUp|Basecamp|Smartsheet|Linear|Postman|Swagger|Docker|Kubernetes|Jenkins|Terraform|Ansible|AWS|Azure|Google Cloud|Linux|Windows|macOS|Android|iOS|VS Code|IntelliJ|PyCharm|Eclipse|Visual Studio|Android Studio|Xcode|Selenium|Cypress|JUnit|TestRail|Tableau|Qlik|Looker|Google Data Studio|SPSS|SAS|Stata|Jupyter|TensorFlow|PyTorch|Pandas|NumPy|Hadoop|Spark|Snowflake|BigQuery|Power Query|Salesforce|HubSpot|Zoho CRM|Pipedrive|Zendesk|Freshdesk|Intercom|Monday CRM|Dynamics 365|SAP|SAP S/4HANA|Oracle ERP|NetSuite|Priority|חשבשבת|היברו|רחל|מורנינג|חשבונית ירוקה|iCount|QuickBooks|Xero|Sage|Tipalti|Workday|Hilan|מרב|Comeet|BambooHR|SuccessFactors|LinkedIn Recruiter|Greenhouse|Lever|Mailchimp|ActiveCampaign|Klaviyo|Meta Ads|Facebook Ads|Instagram|TikTok Ads|Google Ads|Google Analytics|Google Tag Manager|Google Search Console|SEMrush|Ahrefs|Hootsuite|Buffer|Later|Metricool|Wordtune|ChatGPT|Claude|Gemini|Copilot|Midjourney|DALL-E|Notion AI|Zapier|Make|IFTTT|Moodle|Google Classroom|Kahoot|Mentimeter|Miro|Mural|Lucidchart|Draw.io|Calendly|Typeform|SurveyMonkey|DocuSign|Dropbox|Box|WeTransfer|LastPass|1Password|Photoshop|Illustrator|InDesign|Premiere|After Effects|Lightroom|AutoCAD LT|ETABS|SAP2000|Primavera|MS Project|Procore|Epic|Cerner|Clalit Medical System|מטאוויזן|אמ.אר.אס|Cisco Packet Tracer|Wireshark|Nmap|Splunk|Active Directory|VMware|VirtualBox|Zabbix|Nagios|SCCM|Intune|ServiceNow|Remedy|TeamViewer|AnyDesk|QGIS|ArcGIS|Revit MEP|ArchiCAD|3D Studio|Twinmotion|Enscape|V-Ray|Substance Painter|Procreate|Clip Studio|Toon Boom|Scribus").split("|");
+const OPTS2=OPTS;
 const VERBS=["ניהלתי","פיתחתי","הובלתי","הקמתי","שיפרתי","ייעלתי","הטמעתי","אחראית על","בניתי","ליוויתי","הגדלתי","תכננתי"];
+OPTS.LV=LV;
 const LISTS={
  jobs:[["שם התפקיד","role"],["חברה / ארגון","company"],["שנים (לדוגמה: 2021–2024)","years"],["תיאור תפקיד – פעלים כמו ניהלתי, פיתחתי, הובלתי","desc","t"]],
- edu:[["תואר אקדמי / תעודה (תחום הלימודים)","degree"],["מוסד הלימודים","inst"],["שנת סיום","year"],["הצטיינויות או ממוצע גבוה (אם רלוונטי)","honors"]],
+ edu:[["סוג תואר / תעודה (בחרי מהרשימה)","type","s:DG"],["תחום הלימודים (למשל: עיצוב גרפי)","degree"],["מוסד הלימודים","inst"],["שנת סיום","year"],["הצטיינויות או ממוצע גבוה (אם רלוונטי)","honors"]],
  courses:[["שם הקורס / ההסמכה / הסדנה","name"],["גוף מארגן","org"],["שנה","year"]],
  military:[["שנות שירות (לדוגמה: 2015–2018)","years"],["תפקיד","role"],["חיל / יחידה","unit"],["עיקרי העשייה (פיקוד, ניהול, הדרכה, טכנולוגיה)","desc","t"]],
- langs:[["שפה","name"],["רמת שליטה","level","s"]]
+ langs:[["שפה (בחרי מהרשימה או הקלידי)","name","d:langlist"],["רמת שליטה","level","s:LV"]]
 };
-const blank=k=>Object.fromEntries(LISTS[k].map(x=>[x[1],x[2]==="s"?LV[0]:""]));
-let S={color:"#1e3a8a",name:"",phone:"",city:"",email:"",dob:"",profile:"",tech:"",soft:"",jobs:[blank("jobs")],edu:[blank("edu")],courses:[blank("courses")],military:[],langs:[{name:"עברית",level:LV[0]},{name:"אנגלית",level:LV[1]}]};
+const blank=k=>Object.fromEntries(LISTS[k].map(x=>[x[1],x[2]&&x[2][0]==="s"?OPTS[x[2].slice(2)][0]:""]));
+let S={color:"#1e3a8a",name:"",phone:"",city:"",email:"",dob:"",profile:"",photo:"",tech:"",soft:"",jobs:[blank("jobs")],edu:[blank("edu")],courses:[blank("courses")],military:[],langs:[{name:"עברית",level:LV[0]},{name:"אנגלית",level:LV[1]}]};
 const $=s=>document.querySelector(s),esc=t=>String(t??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const say=(t,err)=>{$("#msg").textContent=t;$("#msg").style.color=err?"#dc2626":"var(--mu)"};
 try{const s=localStorage.getItem("cv2");if(s)S=Object.assign(S,JSON.parse(s))}catch(e){}
@@ -119,7 +141,7 @@ function lists(){
   for(const k in LISTS){
     $("#"+k).innerHTML=S[k].map((it,i)=>`<div class="item">${LISTS[k].map(([l,f,t])=>{
       const a=`data-l="${k}" data-i="${i}" data-f="${f}"`,v=it[f]||"";
-      return `<label>${l}</label>`+(t==="t"?`<textarea ${a}>${esc(v)}</textarea>`:t==="s"?`<select ${a}>${LV.map(o=>`<option${o==v?" selected":""}>${o}</option>`).join("")}</select>`:`<input ${a} value="${esc(v)}">`)}).join("")}${k==="jobs"?`<div class="hint">פעלים להוספה:</div><div>${VERBS.map(v=>`<button class="sm" type="button" data-verb="${v}" data-i="${i}">${v}</button>`).join(" ")}</div>`:""}<br><button class="sm" data-del="${k}" data-i="${i}">מחק</button></div>`).join("");
+      return `<label>${l}</label>`+(t==="t"?`<textarea ${a}>${esc(v)}</textarea>`:t&&t[0]==="s"?`<select ${a}>${OPTS[t.slice(2)].map(o=>`<option value="${esc(o)}"${o==v?" selected":""}>${o||"בחרי…"}</option>`).join("")}</select>`:t&&t[0]==="d"?`<input ${a} list="${t.slice(2)}" value="${esc(v)}">`:`<input ${a} value="${esc(v)}">`)}).join("")}${k==="jobs"?`<div class="hint">פעלים להוספה:</div><div>${VERBS.map(v=>`<button class="sm" type="button" data-verb="${v}" data-i="${i}">${v}</button>`).join(" ")}</div>`:""}<br><button class="sm" data-del="${k}" data-i="${i}">מחק</button></div>`).join("");
   }
 }
 const fmtDob=d=>{if(!d)return"";const[a,b,c]=d.split("-");return `${c}/${b}/${a}`};
@@ -128,17 +150,16 @@ const meta=a=>a.filter(Boolean).map(esc).join(" • ");
 function render(){
   const c=S.color,h=t=>`<h4 style="color:${c};border-color:${c}">${t}</h4>`;
   const ct=[S.phone&&"📞 "+esc(S.phone),S.email&&"✉ "+esc(S.email),S.city&&"📍 "+esc(S.city),S.dob&&"🎂 "+fmtDob(S.dob)].filter(Boolean).map(x=>`<span>${x}</span>`).join("");
-  let o=`<div class="top" style="background:${c}"><h3>${esc(S.name)||"שם מלא"}</h3><div class="ct">${ct}</div></div><div class="bd">`;
+  let o=`<div class="top" style="background:${c}"><div><h3>${esc(S.name)||"שם מלא"}</h3><div class="ct">${ct}</div></div>${S.photo?`<img src="${S.photo}" alt="">`:""}</div><div class="bd">`;
   if(S.profile)o+=h("פרופיל מקצועי")+`<p>${esc(S.profile)}</p>`;
   const jobs=S.jobs.filter(j=>j.role||j.company);
   if(jobs.length)o+=h("ניסיון תעסוקתי")+jobs.map(j=>`<div class="j"><div class="jt">${esc(j.role)}${j.company?" | "+esc(j.company):""}</div><div class="jm">${esc(j.years)}</div><p>${esc(j.desc)}</p></div>`).join("");
-  const ed=S.edu.filter(e=>e.degree||e.inst);
-  if(ed.length)o+=h("השכלה ולימודים")+ed.map(e=>`<div class="j"><div class="jt">${esc(e.degree)}</div><div class="jm">${meta([e.inst,e.year])}</div>${e.honors?`<p>${esc(e.honors)}</p>`:""}</div>`).join("");
+  const ed=S.edu.filter(e=>e.type||e.degree||e.inst);
+  if(ed.length)o+=h("השכלה ולימודים")+ed.map(e=>`<div class="j"><div class="jt">${esc([e.type,e.degree].filter(Boolean).join(" – "))}</div><div class="jm">${meta([e.inst,e.year])}</div>${e.honors?`<p>${esc(e.honors)}</p>`:""}</div>`).join("");
   const cr=S.courses.filter(e=>e.name);
   if(cr.length)o+=h("קורסים, הכשרות והסמכות")+cr.map(e=>`<div class="j"><span class="jt">${esc(e.name)}</span> <span class="jm">${meta([e.org,e.year])}</span></div>`).join("");
-  if(S.tech||S.soft){o+=h("כישורים ומיומנויות");
-    if(S.tech)o+=`<p><b>כלים ותוכנות:</b> ${list(S.tech).map(esc).join(" • ")}</p>`;
-    if(S.soft)o+=`<p><b>כישורים מקצועיים ורכים:</b> ${list(S.soft).map(esc).join(" • ")}</p>`}
+  if(S.soft)o+=h("כישורים ומיומנויות")+`<p>${list(S.soft).map(esc).join(" • ")}</p>`;
+  if(S.tech)o+=h("תוכנות מחשב")+`<p>${list(S.tech).map(esc).join(" • ")}</p>`;
   const ml=S.military.filter(e=>e.role||e.unit||e.years);
   if(ml.length)o+=h("שירות צבאי / לאומי")+ml.map(e=>`<div class="j"><div class="jt">${esc(e.role)}${e.unit?" | "+esc(e.unit):""}</div><div class="jm">${esc(e.years)}</div>${e.desc?`<p>${esc(e.desc)}</p>`:""}</div>`).join("");
   const lg=S.langs.filter(l=>l.name);
@@ -146,13 +167,23 @@ function render(){
   $("#cv").innerHTML=o+"</div>";
   try{localStorage.setItem("cv2",JSON.stringify(S))}catch(e){}
 }
-function fill(){document.querySelectorAll("[data-k]").forEach(e=>e.value=S[e.dataset.k]||"");$("#color").value=S.color;lists();render()}
+function chips(){const L=list(S.tech);$("#swchips").innerHTML=L.map((x,i)=>`<span class="chip">${esc(x)}<b data-rm="${i}">×</b></span>`).join("")}
+function addSW(v){v=(v||"").trim();if(!v)return;const L=list(S.tech);if(!L.some(x=>x.toLowerCase()===v.toLowerCase())){L.push(v);S.tech=L.join(", ")}$("#swin").value="";chips();render()}
+function fill(){chips();document.querySelectorAll("[data-k]").forEach(e=>e.value=S[e.dataset.k]||"");$("#color").value=S.color;lists();render()}
 document.addEventListener("input",e=>{const t=e.target;
   if(t.id==="color")S.color=t.value;
   else if(t.dataset.k)S[t.dataset.k]=t.value;
   else if(t.dataset.l)S[t.dataset.l][+t.dataset.i][t.dataset.f]=t.value;
   render()});
+$("#swlist").innerHTML=SWALL.map(x=>`<option value="${esc(x)}">`).join("");
+$("#langlist").innerHTML=LANGS.map(x=>`<option value="${esc(x)}">`).join("");
+$("#swadd").onclick=()=>addSW($("#swin").value);
+$("#swin").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addSW($("#swin").value)}});
+$("#swin").addEventListener("input",e=>{if((!e.inputType||e.inputType==="insertReplacementText")&&SWALL.includes(e.target.value))addSW(e.target.value)});
+$("#photo").onchange=function(){const f=this.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const m=360,sc=Math.min(1,m/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext("2d").drawImage(img,0,0,c.width,c.height);S.photo=c.toDataURL("image/jpeg",.85);render();say("✓ התמונה נוספה")};img.onerror=()=>say("לא ניתן לקרוא את התמונה",1);img.src=r.result};r.readAsDataURL(f);this.value=""};
+$("#phdel").onclick=()=>{S.photo="";render()};
 document.addEventListener("click",e=>{const t=e.target;
+  if(t.dataset.rm!==undefined){const L=list(S.tech);L.splice(+t.dataset.rm,1);S.tech=L.join(", ");chips();render()}
   if(t.dataset.verb){const j=S.jobs[+t.dataset.i];j.desc+=(j.desc&&!j.desc.endsWith("\n")?"\n":"")+"• "+t.dataset.verb+" ";lists();render()}
   if(t.id==="tpl"){S.profile="בעלת ניסיון של [X] שנים ב[תחום], עם התמחות ב[התמחות]. הובלתי/פיתחתי [הישג עיקרי]. מחפשת כיום תפקיד [סוג תפקיד] ב[סוג ארגון] שבו אוכל לתרום [ערך מרכזי].";fill()}
   if(t.dataset.add){S[t.dataset.add].push(blank(t.dataset.add));lists();render()}
@@ -160,7 +191,7 @@ document.addEventListener("click",e=>{const t=e.target;
 
 /* Parser */
 const YR=/((?:19|20)\d\d)\s*[-–—עד]+\s*((?:19|20)\d\d|היום|כיום|הווה|present|now)|(?:19|20)\d\d/i;
-const HD={profile:/^(פרופיל|תקציר|אודות|סיכום|summary|profile|about)/i,jobs:/^(ניסיון|תעסוקת|experience|employment)/i,edu:/^(השכלה|לימודים|education)/i,courses:/^(קורסים|הכשרות|הסמכות|תעודות|courses|certifications)/i,skills:/^(כישורים|מיומנויות|skills|שליטה)/i,military:/^(שירות צבאי|שירות לאומי|שירות סדיר|צבא|military)/i,langs:/^(שפות|languages)/i};
+const HD={profile:/^(פרופיל|תקציר|אודות|סיכום|summary|profile|about)/i,jobs:/^(ניסיון|תעסוקת|experience|employment|work)/i,edu:/^(השכלה|לימודים|education)/i,courses:/^(קורסים|הכשרות|הסמכות|תעודות|השתלמויות|courses|certifications)/i,tech:/^(תוכנות|שליטה במערכות|שליטה בתוכנות|טכנולוגיות|כלים|software|tools)/i,skills:/^(כישורים|מיומנויות|skills)/i,military:/^(שירות צבאי|שירות לאומי|שירות סדיר|צבא|military)/i,langs:/^(שפות|languages)/i};
 function blocks(lines){
   const yi=lines.map((l,i)=>YR.test(l)&&l.length<90?i:-1).filter(i=>i>=0);
   const p=yi.length&&yi[0]<=2?yi[0]:0;
@@ -169,6 +200,14 @@ function blocks(lines){
     const k=ln.findIndex(l=>YR.test(l)&&l.length<90);
     if(k>=0){const m=ln[k].match(YR);years=m[0];ln[k]=ln[k].replace(m[0],"").replace(/[|•,\-–()]+/g," ").trim();if(!ln[k])ln.splice(k,1)}
     return{years,ln}})}
+function detDeg(t){
+  if(/דוקטור|Ph\.?D/i.test(t))return DG.find(x=>x.startsWith("דוקטורט"));
+  const m=/MBA/i.test(t)?"MBA":/M\.?Sc|מוסמך.*מדע|תואר שני.*מדע/i.test(t)?"M.Sc.":/LL\.?M/i.test(t)?"LL.M.":/M\.?Ed/i.test(t)?"M.Ed.":/תואר שני|M\.?A\b|מוסמך/i.test(t)?"M.A.":null;
+  if(m)return DG.find(x=>x.startsWith("תואר שני")&&x.includes(m))||"";
+  const b=/LL\.?B|משפטים/i.test(t)?"LL.B.":/B\.?Ed|הוראה/i.test(t)&&/תואר|בוגר/.test(t)?"B.Ed.":/B\.?Sc|בוגר.*מדע|הנדסה|B\.?Eng/i.test(t)?(/הנדסה|B\.?Eng/i.test(t)?"B.Eng.":"B.Sc."):/תואר ראשון|B\.?A\b|בוגר/i.test(t)?"B.A.":null;
+  if(b)return DG.find(x=>x.startsWith("תואר ראשון")&&x.includes(b))||"";
+  if(/הנדסאי/.test(t))return "תעודת הנדסאי";if(/טכנאי/.test(t))return "תעודת טכנאי";if(/תעודת הוראה/.test(t))return "תעודת הוראה";if(/בגרות/.test(t))return "תעודת בגרות";if(/תעודה|הסמכה/.test(t))return "תעודה מקצועית";
+  return ""}
 function parseCV(txt){
   const L=txt.split(/\r?\n/).map(l=>l.replace(/\s+/g," ").trim()).filter(Boolean);let found=0;
   const em=txt.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);if(em){S.email=em[0];found++}
@@ -182,16 +221,23 @@ function parseCV(txt){
       return{role,company,years:b.years,desc:ln.map(x=>"• "+x).join("\n")}});found++}
   if(sec.edu?.length){const hon=/ממוצע|הצטיינ|דיקן|ציון|cum laude/i;
     S.edu=blocks(sec.edu).map(b=>{const ln=b.ln,honors=ln.filter(x=>hon.test(x)).join(", "),r=ln.filter(x=>!hon.test(x));
-      return{degree:r.shift()||"",inst:r.join(" – "),year:b.years,honors}});found++}
+      const all=ln.join(" "),dt=detDeg(all);return{type:dt,degree:r.shift()||"",inst:r.join(" – "),year:b.years,honors}});found++}
   if(sec.courses?.length){S.courses=sec.courses.map(l=>{const y=(l.match(/(?:19|20)\d\d/)||[""])[0],p=l.replace(y,"").replace(/[()]/g," ").split(/\s[-–|]\s/).map(x=>x.trim()).filter(Boolean);
       return{name:p[0]||"",org:p.slice(1).join(", "),year:y}});found++}
   if(sec.military?.length){S.military=blocks(sec.military).map(b=>{const ln=b.ln,role=ln.shift()||"";let unit="";if(ln.length>1&&ln[0].length<40)unit=ln.shift();
       return{years:b.years,role,unit,desc:ln.map(x=>"• "+x).join("\n")}});found++}
-  if(sec.skills?.length){const soft=/תקשורת|עבודת צוות|ניהול זמן|יצירתיות|פתרון בעיות|סבלנות|אחריות|למידה|שירות|ניהול תקציב|הנחיה|הדרכה/;const T=[],O=[];
-    sec.skills.join(",").split(/[,،;|]/).map(x=>x.replace(/^[^:]{0,30}:/,"").trim()).filter(Boolean).forEach(x=>(soft.test(x)?O:T).push(x));
-    S.tech=T.join(", ");S.soft=O.join(", ");found++}
+  const SW=["Microsoft Office","Office","Word","Excel","PowerPoint","Outlook","Access","Google Sheets","Google Docs","Google Workspace","Canva","Figma","Photoshop","Illustrator","InDesign","Premiere","After Effects","Lightroom","Sketch","AutoCAD","Revit","SolidWorks","Python","JavaScript","TypeScript","Java","C#","C++","PHP","SQL","MySQL","React","Node.js","HTML","CSS","Git","GitHub","Excel","Jira","Asana","Trello","Monday","Notion","Slack","Zoom","Teams","SAP","Priority","Salesforce","HubSpot","CRM","ERP","WordPress","Wix","Shopify","Power BI","Tableau","Google Analytics","Facebook Ads","Google Ads","SPSS","Matlab","QuickBooks","חשבשבת","היברו","פריוריטי"];
+  const have=new Set(),swFound=[];
+  SW.forEach(n=>{const e=n.replace(/[.+#]/g,"\\$&"),re=/[A-Za-z]/.test(n)?new RegExp("(?<![A-Za-z])"+e+"(?![A-Za-z])","i"):new RegExp(e);
+    if(re.test(txt)&&!(n==="Office"&&/Microsoft Office/i.test(txt))&&!have.has(n.toLowerCase())){have.add(n.toLowerCase());swFound.push(n)}});
+  const items=a=>(a||[]).join(",").split(/[,،;|]/).map(x=>x.replace(/^[^:]{0,30}:/,"").trim()).filter(Boolean);
+  const soft=/תקשורת|עבודת צוות|ניהול זמן|יצירתיות|פתרון בעיות|סבלנות|אחריות|למידה|שירות|ניהול תקציב|הנחיה|הדרכה|מוטיבציה|גמישות|יוזמה|עמידה בלחץ|הקשבה|משא ומתן|ארגון|מנהיגות/;
+  const T=[...swFound],O=[];
+  items(sec.tech).forEach(x=>{if(!have.has(x.toLowerCase())){have.add(x.toLowerCase());T.push(x)}});
+  items(sec.skills).forEach(x=>{if(soft.test(x))O.push(x);else if(/[A-Za-z]/.test(x)){if(!have.has(x.toLowerCase())){have.add(x.toLowerCase());T.push(x)}}else if(!swFound.some(n=>x.includes(n)))O.push(x)});
+  if(T.length){S.tech=T.join(", ");found++}if(O.length){S.soft=O.join(", ");found++}
   const lt=(sec.langs||[]).join(" ")||"",lg=[];
-  ["עברית","אנגלית","ערבית","רוסית","צרפתית","ספרדית","גרמנית"].forEach(n=>{const i=lt.indexOf(n);if(i<0)return;const seg=lt.slice(i,i+30);
+  LANGS.forEach(n=>{const nm=n.split(" (")[0],i=lt.indexOf(nm);if(i<0)return;const seg=lt.slice(i,i+30);
     lg.push({name:n,level:/שפת אם|שפת-אם/.test(seg)?LV[0]:/גבוהה|שוטפת|טובה מאוד|מצוינת/.test(seg)?LV[1]:/בינונית|טובה/.test(seg)?LV[2]:LV[3]})});
   if(lg.length){S.langs=lg;found++}
   ["jobs","edu","courses","langs"].forEach(x=>{if(!S[x].length)S[x]=[blank(x)]});fill();return found}
@@ -206,19 +252,19 @@ $("#file").onchange=async function(){
     else if(n.endsWith(".pdf")){
       const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
       for(let p=1;p<=pdf.numPages;p++){const c=await(await pdf.getPage(p)).getTextContent();let y=null;for(const it of c.items){const yy=it.transform[5];if(y!==null&&Math.abs(yy-y)>2)txt+="\n";txt+=it.str+" ";y=yy}txt+="\n"}
-    }else throw {message:"סוג קובץ לא נתמך"};
+    }else if(n.endsWith(".doc"))throw {message:"קובץ Word ישן (.doc). שמרי אותו כ-.docx או כ-PDF ונסי שוב"};else throw {message:"סוג קובץ לא נתמך. אפשר PDF, Word (.docx) או טקסט"};
     if(txt.trim().length<30)throw {message:"לא נמצא טקסט בקובץ (אולי סרוק כתמונה)"};
-    const r=$("#ref");r.style.display="block";r.value=txt;const n2=parseCV(txt);say(`✓ זוהו ${n2} חלקים והוכנסו לטופס. בדקי ותקני – הטקסט המקורי נשאר בתיבה להעתקה.`);
+    const r=$("#ref");r.style.display="block";r.value=txt;const n2=parseCV(txt);say(`✓ זוהו ${n2} חלקים והוכנסו לטופס. בדקי ותקני – הטקסט המקורי נשאר בתיבה. להשלמה ולניסוח מקצועי אפשר להשתמש בכרטיס ChatGPT.`);
   }catch(e){say("שגיאה: "+(e.message||"לא ניתן לקרוא את הקובץ"),1)}
   this.value="";
 };
 
 /* ChatGPT bridge */
-const SCHEMA=`{"name":"","phone":"","city":"","email":"","dob":"YYYY-MM-DD או ריק","profile":"","jobs":[{"role":"","company":"","years":"","desc":""}],"edu":[{"degree":"תואר / תעודה (תחום הלימודים)","inst":"מוסד הלימודים","year":"שנת סיום","honors":"הצטיינות או ממוצע, אם יש"}],"courses":[{"name":"","org":"","year":""}],"tech":"כלים ותוכנות, מופרד בפסיקים","soft":"כישורים מקצועיים ורכים, מופרד בפסיקים","military":[{"years":"","role":"","unit":"חיל / יחידה","desc":""}],"langs":[{"name":"","level":"${LV.join("|")}"}]}`;
+const SCHEMA=`{"name":"","phone":"","city":"","email":"","dob":"YYYY-MM-DD או ריק","profile":"","jobs":[{"role":"","company":"","years":"","desc":""}],"edu":[{"type":"${DG.slice(1).join("|")}","degree":"תחום הלימודים","inst":"מוסד הלימודים","year":"שנת סיום","honors":"הצטיינות או ממוצע, אם יש"}],"courses":[{"name":"","org":"","year":""}],"soft":"כישורים רכים בלבד, מופרד בפסיקים","tech":"כל תוכנות המחשב והמערכות, מופרד בפסיקים","military":[{"years":"","role":"","unit":"חיל / יחידה","desc":""}],"langs":[{"name":"","level":"${LV.join("|")}"}]}`;
 $("#cp").onclick=async()=>{
-  const d={...S};delete d.color;const ref=$("#ref").value.trim();
+  const d={...S};delete d.color;delete d.photo;const ref=$("#ref").value.trim();
   const prompt=`אתה עורך מקצועי של קורות חיים בעברית. נסח את קורות החיים הבאים בצורה מקצועית וקצרה.
-כללים: ניסיון והשכלה מהחדש לישן. תיאורי תפקיד בפעלים בלשון עבר (ניהלתי, פיתחתי, הובלתי), שורה לכל נקודה ובתחילתה "• ". פרופיל מקצועי של 2-4 שורות: ניסיון ומה מחפש כיום. הפרד בין לימודים אקדמיים, קורסים והסמכות, ושירות צבאי. אל תמציא עובדות, חברות או נתונים שלא נמסרו.
+כללים: ניסיון והשכלה מהחדש לישן. תיאורי תפקיד בפעלים בלשון עבר (ניהלתי, פיתחתי, הובלתי), שורה לכל נקודה ובתחילתה "• ". פרופיל מקצועי של 2-4 שורות: ניסיון ומה מחפש כיום. הפרד בין לימודים אקדמיים, קורסים והסמכות, ושירות צבאי. בשדה soft כתוב כישורים רכים בלבד (למשל ניהול זמן, עבודת צוות). בשדה tech רשום את כל תוכנות המחשב והמערכות שמופיעות בקורות החיים, בכל מקום בטקסט, ולא רק בסעיף הכישורים. אל תמציא עובדות, חברות או נתונים שלא נמסרו.
 החזר JSON בלבד, בלי הסברים, בתוך בלוק קוד, במבנה הזה:
 ${SCHEMA}
 
@@ -230,7 +276,7 @@ $("#ap").onclick=()=>{
   try{
     const t=$("#ans").value,a=t.indexOf("{"),b=t.lastIndexOf("}");
     if(a<0||b<a)throw 0;
-    const r=JSON.parse(t.slice(a,b+1));const keep=S.color;S=Object.assign(S,r,{color:keep});
+    const r=JSON.parse(t.slice(a,b+1));const keep=S.color;S=Object.assign(S,r,{color:keep,photo:S.photo});
     for(const k in LISTS){S[k]=(Array.isArray(S[k])?S[k]:[]).map(x=>({...blank(k),...x}));if(!S[k].length&&k!=="military")S[k]=[blank(k)]}
     S.jobs.forEach(j=>{if(Array.isArray(j.desc))j.desc=j.desc.join("\n")});S.military.forEach(j=>{if(Array.isArray(j.desc))j.desc=j.desc.join("\n")});
     if(Array.isArray(S.tech))S.tech=S.tech.join(", ");if(Array.isArray(S.soft))S.soft=S.soft.join(", ");
@@ -241,7 +287,7 @@ $("#ap").onclick=()=>{
 /* Export */
 $("#pr").onclick=()=>window.print();
 $("#dl").onclick=()=>{
-  const html=`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>${esc(S.name)} - קורות חיים</title><style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;font-family:Arial,sans-serif}.top{padding:28px 32px;color:#fff}.top h3{margin:0 0 6px;font-size:28px}.ct{font-size:13px;display:flex;flex-wrap:wrap;gap:4px 16px}.bd{padding:20px 32px}h4{margin:16px 0 6px;font-size:15px;border-bottom:2px solid;padding-bottom:3px}p{margin:3px 0;font-size:13.5px;white-space:pre-wrap}.jt{font-weight:700}.jm{font-size:12.5px;color:#666}.j{margin-bottom:9px}@page{size:A4;margin:0}</style></head><body>${$("#cv").innerHTML}</body></html>`;
+  const html=`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>${esc(S.name)} - קורות חיים</title><style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;font-family:Arial,sans-serif}.top{padding:28px 32px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px}.top img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #fff}.top h3{margin:0 0 6px;font-size:28px}.ct{font-size:13px;display:flex;flex-wrap:wrap;gap:4px 16px}.bd{padding:20px 32px}h4{margin:16px 0 6px;font-size:15px;border-bottom:2px solid;padding-bottom:3px}p{margin:3px 0;font-size:13.5px;white-space:pre-wrap}.jt{font-weight:700}.jm{font-size:12.5px;color:#666}.j{margin-bottom:9px}@page{size:A4;margin:0}</style></head><body>${$("#cv").innerHTML}</body></html>`;
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download=(S.name||"cv")+".html";a.click();
 };
 fill();
