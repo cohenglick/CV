@@ -48,6 +48,8 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
 #lock{position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
 #lock .box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:24px;max-width:400px;width:100%;text-align:center}
 #lock h2{margin:0 0 8px}#lock input{text-align:center;letter-spacing:2px;margin:10px 0;direction:ltr}
+#lock .buy{background:#7c3aed0f;border:1.5px dashed #7c3aed55;border-radius:12px;padding:12px;margin-top:8px}
+#lock a.btn.pay{background:linear-gradient(120deg,var(--ac),var(--ac2));color:#fff;border:0;font-weight:700}
 #lock a.btn{display:block;text-decoration:none;margin-top:8px;padding:8px;border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-size:14px}
 /* Colorful theme */
 :root{--ac:#7c3aed;--ac2:#db2777;--bg:#f3effd}
@@ -88,13 +90,19 @@ footer a:hover{text-decoration:underline}
 <body>
 <div id="lock"><div class="box">
   <h2>🔒 בונה קורות חיים</h2>
-  <p class="hint" id="lockTxt">הגישה לאפליקציה למשלמים בלבד. יש לך קוד גישה? הזיני אותו כאן.</p>
+  <p class="hint" id="lockTxt">הגישה לאפליקציה בעזרת קוד גישה אישי.</p>
+  <div class="buy">
+    <b>אין לך קוד עדיין?</b>
+    <a class="btn pay" id="payBtn" target="_blank" rel="noopener" style="display:none">🛒 לרכישת קוד גישה</a>
+    <p class="hint" id="payNote" style="margin:6px 0"></p>
+    <a class="btn" id="waBtn" target="_blank" rel="noopener" style="display:none">שליחת אישור תשלום בוואטסאפ</a>
+    <a class="btn" id="mailBtn" href="mailto:cohenglick@gmail.com?subject=%D7%91%D7%A7%D7%A9%D7%AA%20%D7%A7%D7%95%D7%93%20%D7%92%D7%99%D7%A9%D7%94&amp;body=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A7%D7%91%D7%9C%20%D7%A7%D7%95%D7%93%20%D7%92%D7%99%D7%A9%D7%94%20%D7%9C%D7%91%D7%95%D7%A0%D7%94%20%D7%A7%D7%95%D7%A8%D7%95%D7%AA%20%D7%97%D7%99%D7%99%D7%9D.">✉ בקשת קוד / אישור תשלום במייל</a>
+  </div>
+  <p style="margin:14px 0 0"><b>יש לך קוד?</b></p>
   <input id="code" placeholder="XXXX-XXXX" autocomplete="off">
   <button class="p" id="unlock" type="button" style="width:100%">כניסה</button>
-  <p class="hint" style="margin:10px 0 0">תקלה בכניסה? מייל: <a href="mailto:cohenglick@gmail.com" style="color:var(--ac)">cohenglick@gmail.com</a></p>
   <div id="lockErr" style="color:#dc2626;font-size:13px;min-height:18px;margin-top:6px"></div>
-  <a class="btn" id="payBtn" target="_blank" rel="noopener" style="display:none">לרכישת קוד גישה</a>
-  <a class="btn" id="waBtn" target="_blank" rel="noopener" style="display:none">שליחת אישור תשלום בוואטסאפ</a>
+  <p class="hint" style="margin:6px 0 0">תקלה בכניסה? מייל: <a href="mailto:cohenglick@gmail.com" style="color:var(--ac)">cohenglick@gmail.com</a></p>
 </div></div>
 <header class="noprint">
   <h1>📄 בונה קורות חיים</h1>
@@ -343,7 +351,7 @@ $("#file").onchange=async function(){
         txt+="\n"}
     }else if(n.endsWith(".doc"))throw {message:"קובץ Word ישן (.doc). שמרי אותו כ-.docx או כ-PDF ונסי שוב"};else throw {message:"סוג קובץ לא נתמך. אפשר PDF, Word (.docx) או טקסט"};
     if(txt.trim().length<30)throw {message:"לא נמצא טקסט בקובץ (אולי סרוק כתמונה)"};
-    const r=$("#ref");r.style.display="block";r.value=txt;const n2=parseCV(txt);say(`✓ זוהו ${n2} חלקים והוכנסו לטופס. בדקי ותקני – הטקסט המקורי נשאר בתיבה. להשלמה ולניסוח מקצועי אפשר להשתמש בכרטיס ה-AI.`);if(window.ACCESS&&window.ACCESS.aiUrl&&localStorage.getItem("cv_code"))aiRun();
+    const r=$("#ref");r.style.display="block";r.value=txt;const n2=parseCV(txt);say(`✓ זוהו ${n2} חלקים והוכנסו לטופס. בדקי ותקני – הטקסט המקורי נשאר בתיבה. להשלמה ולניסוח מקצועי אפשר להשתמש בכרטיס ה-AI.`);if(AC.aiUrl&&localStorage.getItem("cv_code"))aiRun();
   }catch(e){say("שגיאה: "+(e.message||"לא ניתן לקרוא את הקובץ"),1)}
   this.value="";
 };
@@ -383,7 +391,7 @@ async function aiRun(){
   const btn=$("#aiAuto");btn.disabled=true;say("ה-AI מתקן ומנסח את קורות החיים… זה לוקח עד חצי דקה");
   try{
     const d={...S};delete d.color;delete d.photo;let code="";try{code=localStorage.getItem("cv_code")||""}catch(e){}
-    const res=await fetch(window.ACCESS.aiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code,text:$("#ref").value.slice(0,15000),data:d})});
+    const res=await fetch(AC.aiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code,text:$("#ref").value.slice(0,15000),data:d})});
     const j=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(j.error||"שגיאה בשרת ("+res.status+")");
     applyResult(j.result);say("✓ קורות החיים תוקנו ונוסחו. כדאי לעבור על התוצאה.")
@@ -414,7 +422,10 @@ $("#dl").onclick=()=>{
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download=(S.name||"cv")+".html";a.click();
 };
 /* Access gate */
-const AC=window.ACCESS||{};
+/* ===== הגדרות: אפשר להדביק כאן קישור תשלום (PayBox) ומספר וואטסאפ, ואז לא תלוי בקובץ access.js ===== */
+const SETTINGS={payUrl:"",wa:"",price:"25 ש\"ח",aiUrl:""};
+const _A=window.ACCESS||{},pick=k=>_A[k]||SETTINGS[k];
+const AC={hashes:_A.hashes||[],payUrl:pick("payUrl"),wa:pick("wa"),price:pick("price"),aiUrl:pick("aiUrl")};
 const normCode=c=>c.toUpperCase().replace(/[^A-Z0-9]/g,"");
 async function sha(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 function showAI(){let c="";try{c=localStorage.getItem("cv_code")||""}catch(e){}if(AC.aiUrl&&c)$("#aiAuto").style.display="block"}
@@ -423,9 +434,9 @@ function showAI(){let c="";try{c=localStorage.getItem("cv_code")||""}catch(e){}i
   if(!AC.hashes||!AC.hashes.length){L.style.display="none";return}
   let ok=false;try{const h=localStorage.getItem("cv_access");ok=!!h&&AC.hashes.includes(h)}catch(e){}
   if(ok){L.style.display="none";showAI();return}
-  if(AC.price)$("#lockTxt").textContent=`הגישה לאפליקציה למשלמים בלבד (${AC.price}). יש לך קוד גישה? הזיני אותו כאן.`;
-  if(AC.payUrl){const b=$("#payBtn");b.href=AC.payUrl;b.style.display="block"}
-  if(AC.wa){const b=$("#waBtn");b.href="https://wa.me/"+AC.wa+"?text="+encodeURIComponent("היי, שילמתי עבור הגישה לבונה קורות החיים. מצורף אישור תשלום.");b.style.display="block"}
+  if(AC.payUrl){const b=$("#payBtn");b.href=AC.payUrl;b.style.display="block";b.textContent="🛒 לרכישת קוד גישה"+(AC.price?" ("+AC.price+")":"");$("#payNote").textContent="אחרי התשלום שלחי אישור ונשלח לך קוד גישה."}
+  else $("#payNote").textContent="לרכישת קוד גישה"+(AC.price?" ("+AC.price+")":"")+" שלחי הודעה ונחזור אלייך עם הוראות תשלום וקוד.";
+  if(AC.wa){const b=$("#waBtn");b.href="https://wa.me/"+AC.wa+"?text="+encodeURIComponent("היי, אשמח לקבל קוד גישה לבונה קורות החיים.");b.style.display="block"}
   const go=async()=>{const h=await sha(normCode($("#code").value));
     if(AC.hashes.includes(h)){try{localStorage.setItem("cv_access",h);localStorage.setItem("cv_code",normCode($("#code").value))}catch(e){}L.style.display="none";showAI()}
     else $("#lockErr").textContent="הקוד לא תקין. בדקי שהוזן במדויק."};
