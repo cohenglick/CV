@@ -423,7 +423,7 @@ $("#dl").onclick=()=>{
 };
 /* Access gate */
 /* ===== הגדרות: אפשר להדביק כאן קישור תשלום (PayBox) ומספר וואטסאפ, ואז לא תלוי בקובץ access.js ===== */
-const SETTINGS={payUrl:"",wa:"",price:"25 ש\"ח",aiUrl:""};
+const SETTINGS={payUrl:"https://links.payboxapp.com/0FMI86h4d7b",wa:"",price:"25 ש\"ח",aiUrl:""};
 const _A=window.ACCESS||{},pick=k=>_A[k]||SETTINGS[k];
 const AC={hashes:_A.hashes||[],payUrl:pick("payUrl"),wa:pick("wa"),price:pick("price"),aiUrl:pick("aiUrl")};
 const normCode=c=>c.toUpperCase().replace(/[^A-Z0-9]/g,"");
@@ -434,7 +434,7 @@ function showAI(){let c="";try{c=localStorage.getItem("cv_code")||""}catch(e){}i
   if(!AC.hashes||!AC.hashes.length){L.style.display="none";return}
   let ok=false;try{const h=localStorage.getItem("cv_access");ok=!!h&&AC.hashes.includes(h)}catch(e){}
   if(ok){L.style.display="none";showAI();return}
-  if(AC.payUrl){const b=$("#payBtn");b.href=AC.payUrl;b.style.display="block";b.textContent="🛒 לרכישת קוד גישה"+(AC.price?" ("+AC.price+")":"");$("#payNote").textContent="אחרי התשלום שלחי אישור ונשלח לך קוד גישה."}
+  if(AC.payUrl){const b=$("#payBtn");b.href=AC.payUrl;b.style.display="block";b.textContent="🛒 לרכישת קוד גישה"+(AC.price?" ("+AC.price+")":"");$("#payNote").textContent="הקישור פותח את קבוצת התשלום ב-PayBox. אחרי התשלום שלחי אישור ונשלח לך קוד גישה."}
   else $("#payNote").textContent="לרכישת קוד גישה"+(AC.price?" ("+AC.price+")":"")+" שלחי הודעה ונחזור אלייך עם הוראות תשלום וקוד.";
   if(AC.wa){const b=$("#waBtn");b.href="https://wa.me/"+AC.wa+"?text="+encodeURIComponent("היי, אשמח לקבל קוד גישה לבונה קורות החיים.");b.style.display="block"}
   const go=async()=>{const h=await sha(normCode($("#code").value));
