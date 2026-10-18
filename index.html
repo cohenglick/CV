@@ -79,6 +79,9 @@ footer{max-width:1300px;margin:8px auto 24px;padding:14px 16px;text-align:center
 footer a{color:var(--ac);font-weight:700;text-decoration:none;direction:ltr;unicode-bidi:embed}
 footer a:hover{text-decoration:underline}
 @page{size:A4;margin:0}
+#fitst{max-width:794px;margin:8px auto 0;font-size:13px;padding:6px 12px;border-radius:10px;text-align:center}
+#fitst.ok{background:#10b98120;color:#047857}#fitst.warn{background:#f59e0b22;color:#b45309}
+@media print{#cv{border-radius:0!important;zoom:var(--z,1);min-height:0!important;break-inside:avoid;page-break-after:avoid;overflow:hidden}html,body{height:auto}#fitst{display:none!important}}
 @media print{body{background:#fff}header,.form,.noprint{display:none!important}.wrap{display:block;padding:0}.prev{position:static}#cv{box-shadow:none;max-width:none}}
 </style>
 </head>
@@ -160,7 +163,7 @@ footer a:hover{text-decoration:underline}
   <datalist id="langlist"></datalist>
   <div class="card"><h2>שפות</h2><div id="langs"></div><button class="sm" data-add="langs">+ הוסף שפה</button></div>
 </div>
-<div class="prev"><div id="cv"></div></div>
+<div class="prev"><div id="cv"></div><div id="fitst" class="noprint"></div></div>
 </div>
 <footer class="noprint">🛟 לפתרון תקלות ניתן לשלוח מייל: <a href="mailto:cohenglick@gmail.com">cohenglick@gmail.com</a></footer>
 <script>
@@ -214,6 +217,7 @@ function render(){
   if(lg.length)o+=h("שפות")+`<p>${lg.map(l=>`${esc(l.name)} – ${esc(l.level)}`).join(" | ")}</p>`;
   $("#cv").innerHTML=o+"</div>";
   try{localStorage.setItem("cv2",JSON.stringify(S))}catch(e){}
+  try{fitStatus()}catch(e){}
 }
 function chips(){const L=list(S.tech);$("#swchips").innerHTML=L.map((x,i)=>`<span class="chip">${esc(x)}<b data-rm="${i}">×</b></span>`).join("")}
 function addSW(v){v=(v||"").trim();if(!v)return;const L=list(S.tech);if(!L.some(x=>x.toLowerCase()===v.toLowerCase())){L.push(v);S.tech=L.join(", ")}$("#swin").value="";chips();render()}
@@ -387,10 +391,26 @@ async function aiRun(){
   btn.disabled=false}
 $("#aiAuto").onclick=aiRun;
 
-/* Export */
-$("#pr").onclick=()=>window.print();
+/* One-page fit */
+function fitCalc(){
+  const cv=document.getElementById("cv"),old=[cv.style.width,cv.style.maxWidth,cv.style.minHeight,cv.style.zoom],H=1100;
+  cv.style.width="794px";cv.style.maxWidth="none";cv.style.minHeight="0";
+  let z=1;cv.style.zoom=1;
+  while(cv.getBoundingClientRect().height>H&&z>0.5){z=Math.round((z-0.02)*100)/100;cv.style.zoom=z}
+  const fits=cv.getBoundingClientRect().height<=H;
+  cv.style.width=old[0];cv.style.maxWidth=old[1];cv.style.minHeight=old[2];cv.style.zoom=old[3];
+  cv.style.setProperty("--z",z);return{z,fits}}
+let fitT;
+function fitStatus(){clearTimeout(fitT);fitT=setTimeout(()=>{try{
+  const r=fitCalc(),e=$("#fitst");
+  if(r.z>=0.995){e.className="ok noprint";e.textContent="✓ קורות החיים נכנסים בעמוד אחד (A4)"}
+  else if(r.fits&&r.z>=0.7){e.className="ok noprint";e.textContent=`✓ בהדפסה הטקסט יוקטן אוטומטית ל-${Math.round(r.z*100)}% כדי שיהיה בעמוד אחד`}
+  else{e.className="warn noprint";e.textContent=`⚠ יש הרבה תוכן, הטקסט יוקטן ל-${Math.round(r.z*100)}% ועלול להיות קשה לקריאה. כדאי לקצר תיאורים.`}
+ }catch(e){}},250)}
+window.addEventListener("beforeprint",()=>{try{fitCalc()}catch(e){}});
+$("#pr").onclick=()=>{try{fitCalc()}catch(e){}window.print()};
 $("#dl").onclick=()=>{
-  const html=`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>${esc(S.name)} - קורות חיים</title><style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;font-family:Arial,sans-serif}.top{padding:28px 32px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px}.top img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #fff}.top h3{margin:0 0 6px;font-size:28px}.ct{font-size:13px;display:flex;flex-wrap:wrap;gap:4px 16px}.bd{padding:20px 32px}h4{margin:16px 0 6px;font-size:15px;border-bottom:2px solid;padding-bottom:3px}p{margin:3px 0;font-size:13.5px;white-space:pre-wrap}.jt{font-weight:700}.jm{font-size:12.5px;color:#666}.j{margin-bottom:9px}@page{size:A4;margin:0}</style></head><body>${$("#cv").innerHTML}</body></html>`;
+  const html=`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>${esc(S.name)} - קורות חיים</title><style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;font-family:Arial,sans-serif}.top{padding:28px 32px;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px}.top img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #fff}.top h3{margin:0 0 6px;font-size:28px}.ct{font-size:13px;display:flex;flex-wrap:wrap;gap:4px 16px}.bd{padding:20px 32px}h4{margin:16px 0 6px;font-size:15px;border-bottom:2px solid;padding-bottom:3px}p{margin:3px 0;font-size:13.5px;white-space:pre-wrap}.jt{font-weight:700}.jm{font-size:12.5px;color:#666}.j{margin-bottom:9px}@page{size:A4;margin:0}@media print{#cv{zoom:var(--z,1)}}</style></head><body><div id="cv">${$("#cv").innerHTML}</div><script>${fitCalc.toString()};addEventListener("beforeprint",fitCalc)<\/script></body></html>`;
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download=(S.name||"cv")+".html";a.click();
 };
 /* Access gate */
