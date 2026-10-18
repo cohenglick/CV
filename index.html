@@ -49,6 +49,35 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
 #lock .box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:24px;max-width:400px;width:100%;text-align:center}
 #lock h2{margin:0 0 8px}#lock input{text-align:center;letter-spacing:2px;margin:10px 0;direction:ltr}
 #lock a.btn{display:block;text-decoration:none;margin-top:8px;padding:8px;border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-size:14px}
+/* Colorful theme */
+:root{--ac:#7c3aed;--ac2:#db2777;--bg:#f3effd}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1530;--card:#241d3d;--bd:#3b3160;--ac:#a78bfa;--ac2:#f472b6}}
+body{background:linear-gradient(160deg,var(--bg),#fdf2f8 140%);background-attachment:fixed}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) body{background:linear-gradient(160deg,#1a1530,#2a1530);background-attachment:fixed}}
+header{background:linear-gradient(120deg,#7c3aed,#db2777 60%,#f59e0b);color:#fff;border:0;box-shadow:0 4px 18px #7c3aed44}
+header h1{color:#fff;font-size:22px;letter-spacing:.3px}
+header button{background:#ffffff26;color:#fff;border:1px solid #ffffff66;backdrop-filter:blur(4px)}
+header button:hover{background:#ffffff40}
+header button{white-space:nowrap}
+.card{border-radius:16px;border:1px solid var(--bd);border-top:5px solid var(--ac);box-shadow:0 3px 14px #7c3aed14;transition:box-shadow .2s}
+.card:hover{box-shadow:0 6px 22px #7c3aed26}
+.form .card:nth-of-type(6n+1){border-top-color:#7c3aed}.form .card:nth-of-type(6n+2){border-top-color:#db2777}.form .card:nth-of-type(6n+3){border-top-color:#f59e0b}
+.form .card:nth-of-type(6n+4){border-top-color:#0ea5e9}.form .card:nth-of-type(6n+5){border-top-color:#10b981}.form .card:nth-of-type(6n){border-top-color:#ef4444}
+.card h2{font-size:16px;color:var(--ac)}
+input,textarea,select{border-radius:10px;border:1.5px solid var(--bd);transition:border-color .15s,box-shadow .15s}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--ac);box-shadow:0 0 0 3px #7c3aed26}
+button{border-radius:10px;transition:transform .1s,box-shadow .15s}
+button:hover{transform:translateY(-1px)}
+button.p{background:linear-gradient(120deg,var(--ac),var(--ac2));border:0;color:#fff;box-shadow:0 3px 10px #db277740}
+button.sm{background:#7c3aed14;border-color:#7c3aed40;color:var(--ac)}
+.item{border:1.5px dashed #7c3aed55;background:#7c3aed08;border-radius:12px}
+.chip{background:linear-gradient(120deg,#7c3aed1f,#db27771f);border-color:#7c3aed55}
+#cv{border-radius:6px}
+#lock{background:linear-gradient(135deg,#7c3aed,#db2777 70%,#f59e0b)}
+#lock .box{border-radius:20px;border-top:5px solid var(--ac2);box-shadow:0 12px 40px #0004}
+footer{max-width:1300px;margin:8px auto 24px;padding:14px 16px;text-align:center;font-size:14px;color:var(--mu)}
+footer a{color:var(--ac);font-weight:700;text-decoration:none;direction:ltr;unicode-bidi:embed}
+footer a:hover{text-decoration:underline}
 @page{size:A4;margin:0}
 @media print{body{background:#fff}header,.form,.noprint{display:none!important}.wrap{display:block;padding:0}.prev{position:static}#cv{box-shadow:none;max-width:none}}
 </style>
@@ -59,6 +88,7 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
   <p class="hint" id="lockTxt">הגישה לאפליקציה למשלמים בלבד. יש לך קוד גישה? הזיני אותו כאן.</p>
   <input id="code" placeholder="XXXX-XXXX" autocomplete="off">
   <button class="p" id="unlock" type="button" style="width:100%">כניסה</button>
+  <p class="hint" style="margin:10px 0 0">תקלה בכניסה? מייל: <a href="mailto:cohenglick@gmail.com" style="color:var(--ac)">cohenglick@gmail.com</a></p>
   <div id="lockErr" style="color:#dc2626;font-size:13px;min-height:18px;margin-top:6px"></div>
   <a class="btn" id="payBtn" target="_blank" rel="noopener" style="display:none">לרכישת קוד גישה</a>
   <a class="btn" id="waBtn" target="_blank" rel="noopener" style="display:none">שליחת אישור תשלום בוואטסאפ</a>
@@ -132,6 +162,7 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
 </div>
 <div class="prev"><div id="cv"></div></div>
 </div>
+<footer class="noprint">🛟 לפתרון תקלות ניתן לשלוח מייל: <a href="mailto:cohenglick@gmail.com">cohenglick@gmail.com</a></footer>
 <script>
 const LV=["שפת אם","רמה גבוהה / שוטפת","רמה טובה","רמה בינונית","רמה בסיסית"];
 const DG=["","תעודת בגרות","תעודה מקצועית","תעודת טכנאי","תעודת הנדסאי","תעודת הוראה","לימודי תעודה אקדמיים","תואר ראשון (B.A.)","תואר ראשון (B.Sc.)","תואר ראשון (B.Ed.)","תואר ראשון (LL.B.)","תואר ראשון (B.Eng. / B.Tech.)","תואר ראשון (B.F.A.)","תואר שני (M.A.)","תואר שני (M.Sc.)","תואר שני (MBA)","תואר שני (M.Ed.)","תואר שני (LL.M.)","תואר שני (M.Eng.)","דוקטורט (Ph.D.)","פוסט-דוקטורט","רישיון / התמחות מקצועית","אחר"];
