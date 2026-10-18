@@ -76,9 +76,12 @@ button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
     <textarea id="ref" readonly placeholder="הטקסט מהקובץ יופיע כאן להעתקה" style="margin-top:8px;min-height:110px;display:none"></textarea>
   </div>
   <div class="card">
-    <h2>✨ ניסוח מקצועי בעזרת ChatGPT (חינם)</h2>
+    <h2>✨ ניסוח מקצועי בעזרת AI</h2>
+    <button class="p" id="aiAuto" type="button" style="display:none;width:100%;margin-bottom:10px">⚡ תקני ונסחי אוטומטית</button>
+    <p class="hint" style="margin:0 0 6px">או בשיטה ידנית וחינמית דרך ChatGPT:</p>
     <p class="hint" style="margin:0 0 8px">1) מלאי את הטופס או העלי קובץ קיים. 2) לחצי "העתק פרומפט" והדביקי ב-ChatGPT (או Claude / Gemini). 3) העתיקי את התשובה והדביקי כאן.</p>
-    <button class="p" id="cp" type="button">1. העתק פרומפט</button>
+    <div class="row" style="flex-wrap:wrap"><button class="p" id="cpG" type="button">1. העתק ופתח ChatGPT</button><button class="p" id="cpM" type="button">העתק ופתח Gemini</button><button class="p" id="cpC" type="button">העתק ופתח Claude</button></div>
+    <button class="sm" id="cp" type="button" style="margin-top:6px">או רק העתק פרומפט</button>
     <label>2. הדביקי כאן את התשובה</label>
     <textarea id="ans" placeholder="הדביקי את התשובה שקיבלת (קוד JSON)" style="min-height:90px" dir="ltr"></textarea>
     <button class="p" id="ap" type="button" style="margin-top:6px">3. עדכן את קורות החיים</button>
@@ -305,35 +308,53 @@ $("#file").onchange=async function(){
         txt+="\n"}
     }else if(n.endsWith(".doc"))throw {message:"קובץ Word ישן (.doc). שמרי אותו כ-.docx או כ-PDF ונסי שוב"};else throw {message:"סוג קובץ לא נתמך. אפשר PDF, Word (.docx) או טקסט"};
     if(txt.trim().length<30)throw {message:"לא נמצא טקסט בקובץ (אולי סרוק כתמונה)"};
-    const r=$("#ref");r.style.display="block";r.value=txt;const n2=parseCV(txt);say(`✓ זוהו ${n2} חלקים והוכנסו לטופס. בדקי ותקני – הטקסט המקורי נשאר בתיבה. להשלמה ולניסוח מקצועי אפשר להשתמש בכרטיס ChatGPT.`);
+    const r=$("#ref");r.style.display="block";r.value=txt;const n2=parseCV(txt);say(`✓ זוהו ${n2} חלקים והוכנסו לטופס. בדקי ותקני – הטקסט המקורי נשאר בתיבה. להשלמה ולניסוח מקצועי אפשר להשתמש בכרטיס ה-AI.`);if(window.ACCESS&&window.ACCESS.aiUrl&&localStorage.getItem("cv_code"))aiRun();
   }catch(e){say("שגיאה: "+(e.message||"לא ניתן לקרוא את הקובץ"),1)}
   this.value="";
 };
 
 /* ChatGPT bridge */
 const SCHEMA=`{"name":"","phone":"","city":"","email":"","dob":"YYYY-MM-DD או ריק","profile":"","jobs":[{"role":"","company":"","years":"","desc":""}],"edu":[{"type":"${DG.slice(1).join("|")}","degree":"תחום הלימודים","inst":"מוסד הלימודים","year":"שנת סיום","honors":"הצטיינות או ממוצע, אם יש"}],"courses":[{"name":"","org":"","year":""}],"soft":"כישורים רכים בלבד, מופרד בפסיקים","tech":"כל תוכנות המחשב והמערכות, מופרד בפסיקים","military":[{"years":"","role":"","unit":"חיל / יחידה","desc":""}],"langs":[{"name":"","level":"${LV.join("|")}"}]}`;
-$("#cp").onclick=async()=>{
+async function copyPrompt(url){if(url)window.open(url,"_blank","noopener");
   const d={...S};delete d.color;delete d.photo;const ref=$("#ref").value.trim();
   const prompt=`אתה עורך מקצועי של קורות חיים בעברית. נסח את קורות החיים הבאים בצורה מקצועית וקצרה.
 כללים: ניסיון והשכלה מהחדש לישן. תיאורי תפקיד בפעלים בלשון עבר (ניהלתי, פיתחתי, הובלתי), שורה לכל נקודה ובתחילתה "• ". פרופיל מקצועי של 2-4 שורות: ניסיון ומה מחפש כיום. הפרד בין לימודים אקדמיים, קורסים והסמכות, ושירות צבאי. בשדה soft כתוב כישורים רכים בלבד (למשל ניהול זמן, עבודת צוות). בשדה tech רשום את כל תוכנות המחשב והמערכות שמופיעות בקורות החיים, בכל מקום בטקסט, ולא רק בסעיף הכישורים. אל תמציא עובדות, חברות או נתונים שלא נמסרו.
-החזר JSON בלבד, בלי הסברים, בתוך בלוק קוד, במבנה הזה:
+החזר JSON בלבד, בלי הסברים, בתוך בלוק קוד רגיל (לא כמסמך ולא ב-Canvas), במבנה הזה:
 ${SCHEMA}
 
 ${ref?"טקסט קורות החיים הקיימים:\n\"\"\"\n"+ref.slice(0,15000)+"\n\"\"\"\n\nנתונים שכבר מולאו בטופס:\n":"הנתונים:\n"}${JSON.stringify(d)}`;
-  try{await navigator.clipboard.writeText(prompt);say("✓ הפרומפט הועתק. הדביקי אותו ב-ChatGPT, ואז הדביקי כאן את התשובה.")}
-  catch(e){const t=$("#ans");t.value=prompt;t.select();say("ההעתקה האוטומטית נחסמה. הפרומפט הוצב בתיבה – העתיקי אותו ידנית (Ctrl+C).",1)}
-};
+  try{await navigator.clipboard.writeText(prompt);say("✓ הפרומפט הועתק. הדביקי אותו בצ'אט שנפתח (Ctrl+V), ואז העתיקי את התשובה והדביקי אותה כאן.")}
+  catch(e){const t=$("#ans");t.value=prompt;t.select();say("ההעתקה האוטומטית נחסמה. הפרומפט הוצב בתיבה למטה – העתיקי אותו ידנית (Ctrl+C) והדביקי בצ'אט.",1)}
+}
+$("#cp").onclick=()=>copyPrompt();
+$("#cpG").onclick=()=>copyPrompt("https://chatgpt.com/");
+$("#cpM").onclick=()=>copyPrompt("https://gemini.google.com/app");
+$("#cpC").onclick=()=>copyPrompt("https://claude.ai/new");
+function applyResult(r){
+  const keep=S.color;S=Object.assign(S,r,{color:keep,photo:S.photo});
+  for(const k in LISTS){S[k]=(Array.isArray(S[k])?S[k]:[]).map(x=>({...blank(k),...x}));if(!S[k].length&&k!=="military")S[k]=[blank(k)]}
+  S.jobs.forEach(j=>{if(Array.isArray(j.desc))j.desc=j.desc.join("\n")});S.military.forEach(j=>{if(Array.isArray(j.desc))j.desc=j.desc.join("\n")});
+  if(Array.isArray(S.tech))S.tech=S.tech.join(", ");if(Array.isArray(S.soft))S.soft=S.soft.join(", ");
+  splitSkills();fill()}
 $("#ap").onclick=()=>{
   try{
     const t=$("#ans").value,a=t.indexOf("{"),b=t.lastIndexOf("}");
-    if(a<0||b<a)throw 0;
-    const r=JSON.parse(t.slice(a,b+1));const keep=S.color;S=Object.assign(S,r,{color:keep,photo:S.photo});
-    for(const k in LISTS){S[k]=(Array.isArray(S[k])?S[k]:[]).map(x=>({...blank(k),...x}));if(!S[k].length&&k!=="military")S[k]=[blank(k)]}
-    S.jobs.forEach(j=>{if(Array.isArray(j.desc))j.desc=j.desc.join("\n")});S.military.forEach(j=>{if(Array.isArray(j.desc))j.desc=j.desc.join("\n")});
-    if(Array.isArray(S.tech))S.tech=S.tech.join(", ");if(Array.isArray(S.soft))S.soft=S.soft.join(", ");
-    splitSkills();fill();$("#ans").value="";say("✓ קורות החיים עודכנו. אפשר לערוך ידנית.");
+    if(a<0||b<a){const n=parseCV(t);if(n){$("#ans").value="";say("התשובה לא הייתה JSON, אז סידרתי אותה לפי הכותרות ("+n+" חלקים). כדאי לבדוק ולתקן.");return}throw 0}
+    applyResult(JSON.parse(t.slice(a,b+1)));$("#ans").value="";say("✓ קורות החיים עודכנו. אפשר לערוך ידנית.");
   }catch(e){say("לא הצלחתי לקרוא את התשובה. ודאי שהעתקת את כל ה-JSON (מ-{ עד }).",1)}
 };
+/* Auto AI (via your server) */
+async function aiRun(){
+  const btn=$("#aiAuto");btn.disabled=true;say("ה-AI מתקן ומנסח את קורות החיים… זה לוקח עד חצי דקה");
+  try{
+    const d={...S};delete d.color;delete d.photo;let code="";try{code=localStorage.getItem("cv_code")||""}catch(e){}
+    const res=await fetch(window.ACCESS.aiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code,text:$("#ref").value.slice(0,15000),data:d})});
+    const j=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(j.error||"שגיאה בשרת ("+res.status+")");
+    applyResult(j.result);say("✓ קורות החיים תוקנו ונוסחו. כדאי לעבור על התוצאה.")
+  }catch(e){say("שגיאה: "+(e.message||"לא ניתן להתחבר ל-AI")+". אפשר להשתמש בינתיים בשיטת ההעתקה ל-ChatGPT.",1)}
+  btn.disabled=false}
+$("#aiAuto").onclick=aiRun;
 
 /* Export */
 $("#pr").onclick=()=>window.print();
@@ -345,16 +366,17 @@ $("#dl").onclick=()=>{
 const AC=window.ACCESS||{};
 const normCode=c=>c.toUpperCase().replace(/[^A-Z0-9]/g,"");
 async function sha(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+function showAI(){let c="";try{c=localStorage.getItem("cv_code")||""}catch(e){}if(AC.aiUrl&&c)$("#aiAuto").style.display="block"}
 (function initLock(){
   const L=$("#lock");
   if(!AC.hashes||!AC.hashes.length){L.style.display="none";return}
   let ok=false;try{const h=localStorage.getItem("cv_access");ok=!!h&&AC.hashes.includes(h)}catch(e){}
-  if(ok){L.style.display="none";return}
+  if(ok){L.style.display="none";showAI();return}
   if(AC.price)$("#lockTxt").textContent=`הגישה לאפליקציה למשלמים בלבד (${AC.price}). יש לך קוד גישה? הזיני אותו כאן.`;
   if(AC.payUrl){const b=$("#payBtn");b.href=AC.payUrl;b.style.display="block"}
   if(AC.wa){const b=$("#waBtn");b.href="https://wa.me/"+AC.wa+"?text="+encodeURIComponent("היי, שילמתי עבור הגישה לבונה קורות החיים. מצורף אישור תשלום.");b.style.display="block"}
   const go=async()=>{const h=await sha(normCode($("#code").value));
-    if(AC.hashes.includes(h)){try{localStorage.setItem("cv_access",h)}catch(e){}L.style.display="none"}
+    if(AC.hashes.includes(h)){try{localStorage.setItem("cv_access",h);localStorage.setItem("cv_code",normCode($("#code").value))}catch(e){}L.style.display="none";showAI()}
     else $("#lockErr").textContent="הקוד לא תקין. בדקי שהוזן במדויק."};
   $("#unlock").onclick=go;$("#code").addEventListener("keydown",e=>{if(e.key==="Enter")go()});
 })();
